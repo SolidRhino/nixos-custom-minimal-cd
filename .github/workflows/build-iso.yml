@@ -29,11 +29,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up QEMU for multi-architecture builds
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
         with:
           extra-conf: |
             experimental-features = nix-command flakes
+            extra-platforms = aarch64-linux
 
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@main
