@@ -3,9 +3,19 @@
   "extends": [
     "config:recommended"
   ],
+  "dependencyDashboard": false,
   "schedule": [
     "every weekend"
   ],
+  "prConcurrentLimit": 1,
+  "prHourlyLimit": 1,
+  "commitMessagePrefix": "chore(deps):",
+  "commitMessageAction": "update",
+  "semanticCommits": "enabled",
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  },
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": [
@@ -14,13 +24,35 @@
   },
   "packageRules": [
     {
-      "matchDatasources": [
-        "git-tags",
-        "github-tags"
-      ],
-      "matchManagers": [
-        "custom.regex"
-      ],
+      "description": "Security patch fixes - auto-merge immediately",
+      "matchUpdateTypes": ["patch"],
+      "matchDatasources": ["git-tags", "github-tags", "github-releases"],
+      "vulnerabilitySeverity": ["LOW", "MODERATE", "HIGH", "CRITICAL"],
+      "groupName": "Security patches",
+      "schedule": ["at any time"],
+      "prPriority": 10,
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "platformAutomerge": true,
+      "ignoreTests": false,
+      "labels": ["security", "auto-merged"]
+    },
+    {
+      "description": "Security breaking changes - immediate PR but manual review",
+      "matchUpdateTypes": ["minor", "major"],
+      "matchDatasources": ["git-tags", "github-tags", "github-releases"],
+      "vulnerabilitySeverity": ["LOW", "MODERATE", "HIGH", "CRITICAL"],
+      "groupName": "Security updates (review needed)",
+      "schedule": ["at any time"],
+      "prPriority": 9,
+      "automerge": false,
+      "labels": ["security", "urgent", "requires-review"]
+    },
+    {
+      "description": "Regular Nix flake inputs - weekly grouped auto-merge",
+      "matchDatasources": ["git-tags", "github-tags"],
+      "matchManagers": ["custom.regex"],
       "groupName": "Nix flake inputs",
       "automerge": true,
       "automergeType": "pr",
@@ -29,9 +61,8 @@
       "ignoreTests": false
     },
     {
-      "matchManagers": [
-        "github-actions"
-      ],
+      "description": "GitHub Actions - weekly grouped auto-merge",
+      "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "automerge": true,
       "automergeType": "pr",
@@ -39,25 +70,13 @@
       "platformAutomerge": true
     },
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "description": "Major version updates - require manual review",
+      "matchUpdateTypes": ["major"],
       "automerge": false,
-      "labels": [
-        "major-update"
-      ]
+      "labels": ["major-update"]
     }
   ],
   "nix": {
-    "enabled": true
-  },
-  "prConcurrentLimit": 3,
-  "prHourlyLimit": 2,
-  "commitMessagePrefix": "chore(deps):",
-  "commitMessageAction": "update",
-  "semanticCommits": "enabled",
-  "dependencyDashboard": true,
-  "vulnerabilityAlerts": {
     "enabled": true
   }
 }
