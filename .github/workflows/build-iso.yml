@@ -12,10 +12,6 @@ on:
   # Manual workflow dispatch
   workflow_dispatch:
 
-  # Daily scheduled build at 00:00 UTC
-  schedule:
-    - cron: '0 0 * * *'
-
 jobs:
   build:
     runs-on: ubuntu-latest
