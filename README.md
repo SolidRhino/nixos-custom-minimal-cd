@@ -4,7 +4,9 @@ A flake-based minimal NixOS installation ISO with enhanced tooling for quick ins
 
 ## Features
 
-- **Editors**: Helix and Neovim (both pre-installed)
+- **Editors**: Helix and Neovim with nixvim (both pre-installed)
+- **LSP Support**: Nix language server (nil) with auto-formatting
+- **Syntax Highlighting**: Treesitter for Nix with extensible grammar support
 - **Version Control**: Git included
 - **SSH Access**: Enabled with password authentication (password: `installer`)
 - **Networking**: DHCP auto-configuration
@@ -114,32 +116,78 @@ environment.etc."helix/config.toml".text = ''
 
 See [Helix documentation](https://docs.helix-editor.com/configuration.html) for more options.
 
-#### Neovim
+#### Neovim (nixvim)
+
+The ISO uses [nixvim](https://github.com/nix-community/nixvim) for declarative Neovim configuration with built-in LSP support for Nix.
+
+**Current Features**:
+- 🎨 Gruvbox colorscheme
+- 🌳 Treesitter syntax highlighting (Nix)
+- 🔧 LSP with nil (Nix language server)
+- ⌨️ Sensible keybindings (Space as leader)
+- 📝 Auto-formatting with nixpkgs-fmt
+
+**Adding More Language Servers**:
 
 Edit `editors/neovim.nix`:
 
 ```nix
-programs.neovim = {
-  enable = true;
-  defaultEditor = true;
-  viAlias = true;
-  vimAlias = true;
-
-  plugins = with pkgs.vimPlugins; [
-    vim-nix
-    nvim-treesitter
-    gruvbox-nvim
-  ];
-
-  extraConfig = ''
-    set number
-    set relativenumber
-    colorscheme gruvbox
-  '';
+plugins.lsp.servers = {
+  nil_ls.enable = true;         # Nix (already enabled)
+  pyright.enable = true;        # Python
+  rust-analyzer.enable = true;  # Rust
+  ts-ls.enable = true;          # TypeScript
 };
 ```
 
-See [NixOS Neovim Wiki](https://nixos.wiki/wiki/Neovim) for more options.
+**Adding More Treesitter Grammars**:
+
+```nix
+plugins.treesitter.settings.ensure_installed = [
+  "nix"
+  "python"
+  "rust"
+  "typescript"
+];
+```
+
+**Adding Plugins**:
+
+```nix
+plugins.telescope.enable = true;    # Fuzzy finder
+plugins.nvim-tree.enable = true;    # File explorer
+plugins.lualine.enable = true;      # Status line
+plugins.which-key.enable = true;    # Keymap hints
+```
+
+**Changing Colorscheme**:
+
+```nix
+# Disable gruvbox first
+colorschemes.gruvbox.enable = false;
+
+# Enable another theme
+colorschemes.catppuccin.enable = true;
+# or
+colorschemes.tokyonight.enable = true;
+# or
+colorschemes.nord.enable = true;
+```
+
+**Key Bindings** (Space as leader):
+- `<leader>w` - Save file
+- `<leader>q` - Quit
+- `<leader>h` - Clear search highlights
+- `<leader>f` - Format code
+- `<leader>rn` - Rename symbol
+- `<leader>ca` - Code action
+- `<leader>e` - Show diagnostics
+- `gd` - Go to definition
+- `gr` - Find references
+- `K` - Show hover info
+- `[d` / `]d` - Previous/next diagnostic
+
+See [nixvim documentation](https://nix-community.github.io/nixvim/) for all available options.
 
 ### Adding Additional Packages
 
