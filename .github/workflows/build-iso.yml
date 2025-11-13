@@ -44,6 +44,7 @@ jobs:
       - name: Build ISO for ${{ matrix.arch }}
         run: |
           ARCH=$(echo "${{ matrix.arch }}" | cut -d'-' -f1)
+          # Using backward-compatible path (could also use: nix build .#packages.${{ matrix.arch }}.iso)
           nix build .#nixosConfigurations.${ARCH}-iso.config.system.build.isoImage --print-build-logs
 
       - name: Get ISO filename

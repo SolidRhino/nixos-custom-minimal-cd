@@ -46,7 +46,13 @@ ISO filenames:
 You can build the **aarch64** ISO locally:
 
 ```bash
-# Build aarch64 ISO
+# Build aarch64 ISO (simplified with flake-parts)
+nix build .#iso
+
+# Or use the explicit path
+nix build .#packages.aarch64-linux.iso
+
+# Or use the backward-compatible path
 nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
 
 # ISO will be in: result/iso/nixos-minimal-aarch64-custom.iso
@@ -59,11 +65,18 @@ nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
 You can build both architectures:
 
 ```bash
-# Build x86_64 ISO
-nix build .#nixosConfigurations.x86_64-iso.config.system.build.isoImage
+# Build x86_64 ISO (simplified)
+nix build .#iso
 
-# Build aarch64 ISO (requires binfmt emulation or remote builder)
+# Or build specific architecture explicitly
+nix build .#packages.x86_64-linux.iso
+nix build .#packages.aarch64-linux.iso
+
+# Or use backward-compatible paths
+nix build .#nixosConfigurations.x86_64-iso.config.system.build.isoImage
 nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
+
+# Note: Building aarch64 on x86_64 requires binfmt emulation or remote builder
 ```
 
 ## GitHub Actions CI/CD
@@ -232,7 +245,7 @@ users.users.root.initialPassword = "your-password-here";
 
 1. Build the ISO:
    ```bash
-   nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
+   nix build .#iso
    ```
 
 2. Test in a VM using UTM or QEMU:
@@ -264,7 +277,9 @@ custom-minimal-cd/
 ├── editors/
 │   ├── helix.nix              # Helix editor configuration
 │   └── neovim.nix             # Neovim editor configuration
-├── flake.nix                  # Main flake entry point
+├── flake-parts/
+│   └── iso.nix                # ISO configuration module (flake-parts)
+├── flake.nix                  # Main flake entry point (uses flake-parts)
 ├── flake.lock                 # Flake dependencies lock file
 ├── configuration.nix          # System configuration
 └── README.md                  # This file
@@ -275,9 +290,9 @@ custom-minimal-cd/
 ### Typical Development Workflow
 
 1. Make changes to configuration files
-2. Test aarch64 build locally (if on M4):
+2. Test build locally (uses current system architecture):
    ```bash
-   nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
+   nix build .#iso
    ```
 3. Commit and push to GitHub
 4. GitHub Actions builds both architectures
