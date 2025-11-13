@@ -38,12 +38,15 @@ ISO filenames:
 
 ### Prerequisites
 
+- **Linux system** (x86_64-linux or aarch64-linux)
 - Nix with flakes enabled
 - Sufficient disk space (~5-10 GB)
 
-### Building on M4 MacBook (or other aarch64 systems)
+**Important**: NixOS ISOs can only be built on Linux systems. macOS users (including M4 MacBooks) should use GitHub Actions for building ISOs.
 
-You can build the **aarch64** ISO locally:
+### Building on aarch64 Linux
+
+If you're on an ARM64 Linux system:
 
 ```bash
 # Build aarch64 ISO (auto-detects your architecture)
@@ -55,11 +58,9 @@ nix build .#packages.aarch64-linux.iso
 # ISO will be in: result/iso/nixos-minimal-aarch64-custom.iso
 ```
 
-**Note**: Building x86_64 ISOs on M4 MacBook is not supported natively. Use GitHub Actions for x86_64 builds.
-
 ### Building on x86_64 Linux
 
-You can build both architectures:
+On Intel/AMD Linux systems, you can build both architectures:
 
 ```bash
 # Build x86_64 ISO (auto-detects your architecture)
@@ -71,6 +72,14 @@ nix build .#packages.aarch64-linux.iso
 
 # Note: Building aarch64 on x86_64 requires binfmt emulation or remote builder
 ```
+
+### Building on macOS (M4 MacBook, etc.)
+
+**NixOS ISOs cannot be built natively on macOS.** Use one of these alternatives:
+
+1. **GitHub Actions** (Recommended): Push to GitHub and let CI/CD build both architectures
+2. **Linux VM**: Use UTM, Parallels, or VirtualBox with a Linux guest
+3. **Remote Builder**: Configure a remote Linux builder in your Nix configuration
 
 ## GitHub Actions CI/CD
 
@@ -86,10 +95,15 @@ Builds are automatically triggered on:
 ### Build Strategy
 
 - Both architectures build in **parallel** for speed
+- **QEMU emulation** enables aarch64 builds on x86_64 runners
 - **Nix caching** via GitHub Actions reduces build times
 - **Validation tests** ensure ISO integrity before upload
 - **Artifacts** available for all builds (90-day retention)
 - **Releases** created automatically for tagged versions
+
+**Build Times:**
+- x86_64 builds: ~2-5 minutes (native)
+- aarch64 builds: ~20-45 minutes (QEMU emulation overhead)
 
 ### Accessing Build Artifacts
 
@@ -234,31 +248,40 @@ users.users.root.initialPassword = "your-password-here";
 
 ## Testing
 
-### Testing aarch64 ISO Locally (M4 MacBook)
+### Testing ISOs
 
-1. Build the ISO:
-   ```bash
-   nix build .#iso
-   ```
+Once you have an ISO (built locally on Linux or downloaded from GitHub Actions):
 
-2. Test in a VM using UTM or QEMU:
-   ```bash
-   # Example with QEMU (if available)
-   qemu-system-aarch64 \
-     -M virt \
-     -cpu cortex-a72 \
-     -m 2G \
-     -cdrom result/iso/*.iso \
-     -boot d
-   ```
+**On Linux:**
+- Use QEMU, VirtualBox, or VMware
+- Write to USB and boot on real hardware
 
-### Testing x86_64 ISO
+**On macOS:**
+- Use UTM (recommended for M4 MacBooks)
+- Use VirtualBox or Parallels
+- Example with UTM: Create new VM, select ISO as boot media
 
-Use GitHub Actions to build, then test in:
-- VirtualBox
-- VMware
-- QEMU
-- Real hardware
+**QEMU Examples:**
+
+```bash
+# Test x86_64 ISO
+qemu-system-x86_64 \
+  -m 2G \
+  -cdrom nixos-minimal-x86_64-custom.iso \
+  -boot d
+
+# Test aarch64 ISO (on ARM Linux or with QEMU emulation)
+qemu-system-aarch64 \
+  -M virt \
+  -cpu cortex-a72 \
+  -m 2G \
+  -cdrom nixos-minimal-aarch64-custom.iso \
+  -boot d
+```
+
+**Real Hardware:**
+- Write ISO to USB: `dd if=nixos-*.iso of=/dev/sdX bs=4M status=progress`
+- Boot from USB and test installation
 
 ## Project Structure
 
@@ -331,11 +354,18 @@ custom-minimal-cd/
 
 ### Build Fails Locally
 
-**Issue**: `error: cannot build on 'x86_64-linux' platform`
+**Issue**: `error: cannot build on 'x86_64-linux' platform` or `error: a 'x86_64-linux' with features {} is required`
 
-**Solution**: You're on a non-compatible architecture (e.g., M4 Mac). Either:
-- Build only the compatible architecture (aarch64 on M4)
-- Use GitHub Actions for cross-platform builds
+**Cause**: NixOS ISOs can only be built on Linux systems. You may be:
+- On macOS (including M4 MacBooks) - ISOs require Linux-specific features
+- Missing required system features or architecture support
+
+**Solution**:
+- **macOS users**: Use GitHub Actions for building (recommended)
+- **Linux users**: Ensure you're using the correct architecture path:
+  - On x86_64: `nix build .#packages.x86_64-linux.iso`
+  - On aarch64: `nix build .#packages.aarch64-linux.iso`
+- **Cross-architecture builds**: Set up binfmt emulation or remote builder
 
 ### ISO Doesn't Boot
 
