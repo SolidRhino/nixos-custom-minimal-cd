@@ -9,8 +9,11 @@
   # Enable flakes and nix-command experimental features system-wide
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Set root password to "installer"
-  users.users.root.initialPassword = "installer";
+  # Set root password to "installer" (password is better for ephemeral ISO)
+  users.users.root = {
+    password = "installer";
+    initialHashedPassword = lib.mkForce null;  # Override base ISO's empty hash
+  };
 
   # Enable SSH with password authentication
   services.openssh = {

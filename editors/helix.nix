@@ -1,10 +1,24 @@
 { config, pkgs, lib, ... }:
 
 {
-  # Install Helix editor
+  # Install Helix editor with LSP tooling
   environment.systemPackages = with pkgs; [
     helix
+    nil           # Nix LSP server
+    nixpkgs-fmt   # Nix formatter
   ];
+
+  # Configure Helix language server for Nix
+  environment.etc."helix/languages.toml".text = ''
+    [[language]]
+    name = "nix"
+    language-servers = ["nil"]
+    formatter = { command = "nixpkgs-fmt" }
+    auto-format = true
+
+    [language-server.nil]
+    command = "nil"
+  '';
 
   # Default Helix configuration (extensible)
   # To customize, you can add configurations here or override via environment variables

@@ -7,3 +7,7 @@ result-*
 
 # Nix cache
 .direnv/
+
+# Local IDE and tool directories
+.claude/
+.serena/
