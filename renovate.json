@@ -24,32 +24,6 @@
   },
   "packageRules": [
     {
-      "description": "Security patch fixes - auto-merge immediately",
-      "matchUpdateTypes": ["patch"],
-      "matchDatasources": ["git-tags", "github-tags", "github-releases"],
-      "vulnerabilitySeverity": ["LOW", "MODERATE", "HIGH", "CRITICAL"],
-      "groupName": "Security patches",
-      "schedule": ["at any time"],
-      "prPriority": 10,
-      "automerge": true,
-      "automergeType": "pr",
-      "automergeStrategy": "squash",
-      "platformAutomerge": true,
-      "ignoreTests": false,
-      "labels": ["security", "auto-merged"]
-    },
-    {
-      "description": "Security breaking changes - immediate PR but manual review",
-      "matchUpdateTypes": ["minor", "major"],
-      "matchDatasources": ["git-tags", "github-tags", "github-releases"],
-      "vulnerabilitySeverity": ["LOW", "MODERATE", "HIGH", "CRITICAL"],
-      "groupName": "Security updates (review needed)",
-      "schedule": ["at any time"],
-      "prPriority": 9,
-      "automerge": false,
-      "labels": ["security", "urgent", "requires-review"]
-    },
-    {
       "description": "Regular Nix flake inputs - weekly grouped auto-merge",
       "matchDatasources": ["git-tags", "github-tags"],
       "matchManagers": ["custom.regex"],
