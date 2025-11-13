@@ -11,10 +11,11 @@
     vimAlias = true;
 
     # Color scheme
-    colorschemes.gruvbox = {
+    colorschemes.catppuccin = {
       enable = true;
       settings = {
-        contrast = "medium";
+        flavour = "mocha";
+        transparent_background = false;
       };
     };
 
@@ -64,9 +65,6 @@
       settings = {
         highlight.enable = true;
         indent.enable = true;
-
-        # Only include Nix grammar for ISO size
-        ensure_installed = [ "nix" ];
       };
     };
 
@@ -86,7 +84,7 @@
 
       keymaps = {
         diagnostic = {
-          "<leader>e" = "open_float";
+          "<leader>d" = "open_float";
           "[d" = "goto_prev";
           "]d" = "goto_next";
         };
@@ -102,8 +100,287 @@
       };
     };
 
+    # Telescope - Fuzzy finder
+    plugins.telescope = {
+      enable = true;
+      keymaps = {
+        "<leader>ff" = {
+          action = "find_files";
+          options.desc = "Find files";
+        };
+        "<leader>fg" = {
+          action = "live_grep";
+          options.desc = "Live grep";
+        };
+        "<leader>fb" = {
+          action = "buffers";
+          options.desc = "Find buffers";
+        };
+        "<leader>fh" = {
+          action = "help_tags";
+          options.desc = "Help tags";
+        };
+      };
+    };
+
+    # Neo-tree - File explorer (LazyVim style)
+    plugins.neo-tree = {
+      enable = true;
+      enableGitStatus = true;
+      enableDiagnostics = true;
+      closeIfLastWindow = true;
+      window = {
+        width = 30;
+        position = "left";
+      };
+    };
+
+    # Noice - Modern UI for messages, cmdline and popupmenu
+    plugins.noice = {
+      enable = true;
+      lsp.override = {
+        "vim.lsp.util.convert_input_to_markdown_lines" = true;
+        "vim.lsp.util.stylize_markdown" = true;
+        "cmp.entry.get_documentation" = true;
+      };
+      presets = {
+        bottom_search = true;
+        command_palette = true;
+        long_message_to_split = true;
+        inc_rename = false;
+        lsp_doc_border = false;
+      };
+    };
+
+    # Dressing - Better vim.ui
+    plugins.dressing = {
+      enable = true;
+    };
+
+    # Bufferline - Buffer tabs at top
+    plugins.bufferline = {
+      enable = true;
+      settings = {
+        options = {
+          diagnostics = "nvim_lsp";
+          always_show_bufferline = true;
+          separator_style = "slant";
+          themable = true;
+        };
+      };
+    };
+
+    # Alpha - Startup dashboard
+    plugins.alpha = {
+      enable = true;
+      layout = [
+        {
+          type = "padding";
+          val = 2;
+        }
+        {
+          type = "text";
+          val = [
+            "███╗   ██╗██╗██╗  ██╗ ██████╗ ███████╗"
+            "████╗  ██║██║╚██╗██╔╝██╔═══██╗██╔════╝"
+            "██╔██╗ ██║██║ ╚███╔╝ ██║   ██║███████╗"
+            "██║╚██╗██║██║ ██╔██╗ ██║   ██║╚════██║"
+            "██║ ╚████║██║██╔╝ ██╗╚██████╔╝███████║"
+            "╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝"
+          ];
+          opts = {
+            position = "center";
+            hl = "Type";
+          };
+        }
+        {
+          type = "padding";
+          val = 2;
+        }
+        {
+          type = "group";
+          val = [
+            {
+              type = "button";
+              val = "  Find file";
+              on_press = { __raw = "function() require('telescope.builtin').find_files() end"; };
+              opts = {
+                shortcut = "SPC ff";
+                keymap = ["n" "<leader>ff" ":Telescope find_files<CR>" { noremap = true; silent = true; }];
+                position = "center";
+                cursor = 3;
+                width = 50;
+                align_shortcut = "right";
+                hl_shortcut = "Keyword";
+              };
+            }
+            {
+              type = "button";
+              val = "  New file";
+              on_press = { __raw = "function() vim.cmd[[ene]] end"; };
+              opts = {
+                shortcut = "SPC n";
+                keymap = ["n" "<leader>fn" ":ene<CR>" { noremap = true; silent = true; }];
+                position = "center";
+                cursor = 3;
+                width = 50;
+                align_shortcut = "right";
+                hl_shortcut = "Keyword";
+              };
+            }
+            {
+              type = "button";
+              val = "  Quit";
+              on_press = { __raw = "function() vim.cmd[[qa]] end"; };
+              opts = {
+                shortcut = "q";
+                keymap = ["n" "q" ":qa<CR>" { noremap = true; silent = true; }];
+                position = "center";
+                cursor = 3;
+                width = 50;
+                align_shortcut = "right";
+                hl_shortcut = "Keyword";
+              };
+            }
+          ];
+        }
+      ];
+    };
+
+    # Aerial - Code outline and navigation
+    plugins.aerial = {
+      enable = true;
+      settings = {
+        layout = {
+          default_direction = "prefer_right";
+          placement = "edge";
+        };
+        attach_mode = "global";
+        backends = ["lsp" "treesitter"];
+      };
+    };
+
+    # Indent-blankline - Indentation guides
+    plugins.indent-blankline = {
+      enable = true;
+      settings = {
+        scope = {
+          enabled = true;
+          show_start = true;
+          show_end = true;
+        };
+      };
+    };
+
+    # Trouble - Pretty diagnostics list
+    plugins.trouble = {
+      enable = true;
+    };
+
+    # Fidget - LSP progress notifications
+    plugins.fidget = {
+      enable = true;
+    };
+
+    # Mini modules - Small useful plugins
+    plugins.mini = {
+      enable = true;
+      modules = {
+        pairs = { };  # Auto pairs
+        surround = { };  # Surround text objects
+        comment = { };  # Better commenting
+      };
+    };
+
+    # Lualine - Status line
+    plugins.lualine = {
+      enable = true;
+      settings = {
+        options = {
+          theme = "catppuccin";
+          icons_enabled = true;
+        };
+      };
+    };
+
+    # Which-key - Keymap hints
+    plugins.which-key = {
+      enable = true;
+    };
+
     # Basic keymaps
     keymaps = [
+      # File explorer toggle (neo-tree)
+      {
+        mode = "n";
+        key = "<leader>e";
+        action = ":Neotree toggle<CR>";
+        options = {
+          desc = "Toggle file explorer";
+          silent = true;
+        };
+      }
+
+      # Code outline toggle (aerial)
+      {
+        mode = "n";
+        key = "<leader>a";
+        action = ":AerialToggle<CR>";
+        options = {
+          desc = "Toggle code outline";
+          silent = true;
+        };
+      }
+
+      # Trouble diagnostics
+      {
+        mode = "n";
+        key = "<leader>xx";
+        action = ":Trouble diagnostics toggle<CR>";
+        options = {
+          desc = "Toggle diagnostics";
+          silent = true;
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>xq";
+        action = ":Trouble quickfix toggle<CR>";
+        options = {
+          desc = "Toggle quickfix";
+          silent = true;
+        };
+      }
+
+      # Buffer navigation
+      {
+        mode = "n";
+        key = "<S-h>";
+        action = ":BufferLineCyclePrev<CR>";
+        options = {
+          desc = "Previous buffer";
+          silent = true;
+        };
+      }
+      {
+        mode = "n";
+        key = "<S-l>";
+        action = ":BufferLineCycleNext<CR>";
+        options = {
+          desc = "Next buffer";
+          silent = true;
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>bd";
+        action = ":bdelete<CR>";
+        options = {
+          desc = "Delete buffer";
+          silent = true;
+        };
+      }
+
       # Better window navigation
       {
         mode = "n";
