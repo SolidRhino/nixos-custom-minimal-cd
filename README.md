@@ -46,14 +46,11 @@ ISO filenames:
 You can build the **aarch64** ISO locally:
 
 ```bash
-# Build aarch64 ISO (simplified with flake-parts)
+# Build aarch64 ISO (auto-detects your architecture)
 nix build .#iso
 
-# Or use the explicit path
+# Or use the explicit architecture path
 nix build .#packages.aarch64-linux.iso
-
-# Or use the backward-compatible path
-nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
 
 # ISO will be in: result/iso/nixos-minimal-aarch64-custom.iso
 ```
@@ -65,16 +62,12 @@ nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
 You can build both architectures:
 
 ```bash
-# Build x86_64 ISO (simplified)
+# Build x86_64 ISO (auto-detects your architecture)
 nix build .#iso
 
 # Or build specific architecture explicitly
 nix build .#packages.x86_64-linux.iso
 nix build .#packages.aarch64-linux.iso
-
-# Or use backward-compatible paths
-nix build .#nixosConfigurations.x86_64-iso.config.system.build.isoImage
-nix build .#nixosConfigurations.aarch64-iso.config.system.build.isoImage
 
 # Note: Building aarch64 on x86_64 requires binfmt emulation or remote builder
 ```
