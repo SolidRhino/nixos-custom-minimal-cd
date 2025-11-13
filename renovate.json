@@ -14,8 +14,13 @@
   },
   "packageRules": [
     {
-      "matchDatasources": ["git-tags", "github-tags"],
-      "matchManagers": ["regex"],
+      "matchDatasources": [
+        "git-tags",
+        "github-tags"
+      ],
+      "matchManagers": [
+        "custom.regex"
+      ],
       "groupName": "Nix flake inputs",
       "automerge": true,
       "automergeType": "pr",
@@ -24,7 +29,9 @@
       "ignoreTests": false
     },
     {
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions",
       "automerge": true,
       "automergeType": "pr",
@@ -32,9 +39,13 @@
       "platformAutomerge": true
     },
     {
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
-      "labels": ["major-update"]
+      "labels": [
+        "major-update"
+      ]
     }
   ],
   "nix": {
