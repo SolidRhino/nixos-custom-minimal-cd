@@ -1,0 +1,9 @@
+# Nix build results
+result
+result-*
+
+# ISO files
+*.iso
+
+# Nix cache
+.direnv/
