@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A flake-based NixOS minimal installation ISO with enhanced tooling for quick installations, repairs, and multi-machine deployments. The project uses **flake-parts** for modular organization and supports x86_64, aarch64, and x86_64-t2 (MacBook Pro with T2 chip) architectures with automated CI/CD builds.
+A flake-based NixOS minimal installation ISO with enhanced tooling for quick installations, repairs, and multi-machine deployments. The project uses **flake-parts** for modular organization and supports x86_64, aarch64, and x86_64-t2 (extends t2linux/nixos-t2-iso) architectures with automated CI/CD builds.
 
 ## Core Architecture
 
@@ -12,13 +12,11 @@ A flake-based NixOS minimal installation ISO with enhanced tooling for quick ins
 
 This project uses [flake-parts](https://flake.parts/) to eliminate duplication and organize the flake structure:
 
-- **flake.nix**: Entry point that imports flake-parts modules
-- **flake-parts/iso.nix**: Contains the `perSystem` configuration and ISO builder logic
-- **flake-parts/t2-iso.nix**: T2 MacBook Pro-specific ISO builder
-- **flake-parts/pkgs/**: Package derivations (firmware-script.nix for T2)
-- **configuration.nix**: System configuration imported by ISO module
+- **flake.nix**: Entry point that imports flake-parts modules and t2linux/nixos-t2-iso
+- **flake-parts/iso.nix**: Contains the `perSystem` configuration and ISO builder logic for standard ISOs
+- **flake-parts/t2-iso.nix**: T2 MacBook Pro ISO builder (extends t2linux/nixos-t2-iso)
+- **configuration.nix**: System configuration imported by ISO modules
 - **editors/**: Modular editor configurations (helix.nix, neovim.nix)
-- **hardware/**: Hardware-specific configurations (t2.nix for T2 Macs)
 
 **Key Pattern**: The `mkIso` helper function in `flake-parts/iso.nix` creates ISO images for each system by combining:
 1. Base minimal installation ISO module from nixpkgs
@@ -34,12 +32,10 @@ The flake defines `systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "a
 - `packages.x86_64-linux.iso-t2` - T2 MacBook Pro ISO (x86_64 with T2 hardware support)
 - `packages.<current-system>.iso` - Auto-detected architecture (when available)
 
-**T2 Support**: The T2 ISO uses nixos-hardware's apple-t2 module and includes:
-- WiFi/Bluetooth firmware extraction tools (python3 + firmware-script package)
-- T2-specific kernel modules and drivers
-- Audio, keyboard, and TouchBar support
-- T2 Linux community binary caches (t2linux.cachix.org + cache.soopy.moe) for faster builds
-- Firmware extraction script from t2linux/wiki (get-apple-firmware command)
+**T2 Support**: The T2 ISO extends [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso), adding:
+- Custom editor configurations (Helix, Neovim with nixvim)
+- All T2 hardware support from upstream (apple-t2 module, firmware tools, binary caches)
+- Same system packages and configuration as standard ISOs
 
 **Important**: Building cross-architecture ISOs requires appropriate builders or emulation. GitHub Actions handles this automatically.
 
@@ -176,34 +172,26 @@ The order in `flake-parts/iso.nix` matters:
 2. nixvim module (adds Neovim declarative configuration)
 3. Custom configuration.nix (overrides and extends)
 
-For T2 ISOs (`flake-parts/t2-iso.nix`), an additional module is imported:
-1. Base minimal installation ISO
-2. nixvim module
-3. Custom configuration.nix
-4. **hardware/t2.nix** (T2-specific hardware support)
+### T2 ISO Implementation
 
-### T2-Specific Implementation
+The T2 ISO extends the upstream [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) project:
+
+1. **Base T2 ISO from t2linux** (includes apple-t2 module, firmware tools, binary caches)
+2. **Custom editors** (nixvim, Helix, Neovim configurations)
+3. **Custom configuration** (same system packages as standard ISOs)
+4. **Unique filename override** (`nixos-minimal-x86_64-t2-custom.iso`)
 
 **Architecture**: T2 MacBook Pros are x86_64 only (Intel-based, 2018-2020 models).
 
-**Key Components**:
-- **nixos-hardware dependency**: Added to flake inputs for apple-t2 module
-- **hardware/t2.nix**: Imports `nixos-hardware.nixosModules.apple-t2` and configures:
-  - T2 Linux binary caches (three-line pattern for max compatibility):
-    - t2linux.cachix.org (primary)
-    - cache.soopy.moe (additional community cache)
-    - Uses extra-trusted-substituters + extra-substituters + extra-trusted-public-keys
-  - System packages: python3, dmg2img, firmware-script
-- **flake-parts/pkgs/firmware-script.nix**: Standalone package that:
-  - Fetches official firmware.sh from t2linux/wiki repository
-  - Creates `get-apple-firmware` command
-  - Supports multiple extraction methods (EFI, macOS volume, recovery image)
-  - Uses embedded Python to parse and rename firmware files
-- **flake-parts/t2-iso.nix**: Separate ISO builder that passes `nixos-hardware` as specialArgs
+**Upstream Features** (provided by t2linux/nixos-t2-iso):
+- Apple T2 hardware support (WiFi, audio, keyboard, TouchBar)
+- Firmware extraction tools (`get-apple-firmware` command)
+- T2 Linux community binary cache (t2linux.cachix.org)
+- nixos-hardware apple-t2 module integration
 
-**Firmware Requirement**: T2 Macs need firmware extracted from macOS for WiFi/Bluetooth. The ISO includes python3 and the comprehensive `get-apple-firmware` tool from the t2linux community.
-
-**Binary Caches**: Uses two T2 Linux community caches to avoid rebuilding T2-specific packages (kernel modules, drivers). The three-line configuration pattern ensures caches work for both trusted and non-trusted users.
+**Our Additions**:
+- Helix and Neovim (nixvim) editor configurations
+- Custom system packages from configuration.nix
 
 ## Testing Approach
 

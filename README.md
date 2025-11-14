@@ -82,13 +82,13 @@ For MacBook Pro with T2 chip (2018-2020 Intel models):
 # Build T2-specific ISO (only available on x86_64 Linux)
 nix build .#packages.x86_64-linux.iso-t2
 
-# ISO will be in: result/iso/nixos-minimal-x86_64-linux-custom.iso
+# ISO will be in: result/iso/nixos-minimal-x86_64-t2-custom.iso
 ```
 
-**Important T2 Notes:**
-- T2 ISO includes Apple T2 hardware support (WiFi, audio, keyboard, TouchBar)
+**T2 ISO Details:**
+- Extends [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) with custom editor configurations
+- Includes Apple T2 hardware support (WiFi, audio, keyboard, TouchBar)
 - Requires firmware extraction from macOS (use `get-apple-firmware` script in ISO)
-- Uses nixos-hardware apple-t2 module for hardware compatibility
 - See [T2 Linux Wiki](https://wiki.t2linux.org/) for detailed hardware setup
 
 ### Building on macOS (M4 MacBook, etc.)
@@ -326,12 +326,8 @@ custom-minimal-cd/
 │   ├── helix.nix                  # Helix editor configuration
 │   └── neovim.nix                 # Neovim editor configuration
 ├── flake-parts/
-│   ├── iso.nix                    # ISO configuration module (flake-parts)
-│   ├── t2-iso.nix                 # T2 MacBook Pro ISO module
-│   └── pkgs/
-│       └── firmware-script.nix    # T2 firmware extraction tool package
-├── hardware/
-│   └── t2.nix                     # T2 chip hardware configuration
+│   ├── iso.nix                    # Standard ISO configuration module
+│   └── t2-iso.nix                 # T2 ISO module (extends t2linux/nixos-t2-iso)
 ├── flake.nix                      # Main flake entry point (uses flake-parts)
 ├── flake.lock                     # Flake dependencies lock file
 ├── configuration.nix              # System configuration
@@ -436,49 +432,18 @@ custom-minimal-cd/
 
 ### T2 MacBook Pro Specific Issues
 
-#### WiFi/Bluetooth Not Working
+The T2 ISO extends [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) which provides comprehensive T2 hardware support.
 
-**Cause**: T2 Macs require firmware extracted from macOS
+**Common Issues:**
+- WiFi/Bluetooth requires firmware extraction from macOS (use included `get-apple-firmware` script)
+- Secure Boot must be disabled in macOS Recovery
+- USB keyboard may be needed during initial setup if internal keyboard doesn't work
 
-**Solution**:
-1. Boot the T2 ISO
-2. Run `get-apple-firmware` script (included in ISO)
-3. Follow instructions to extract firmware from macOS partition
-4. Copy firmware to `/lib/firmware/`
-5. Reload network drivers: `modprobe -r brcmfmac && modprobe brcmfmac`
-
-See [T2 Linux WiFi Guide](https://wiki.t2linux.org/guides/wifi/) for detailed steps.
-
-#### Audio Not Working
-
-**Cause**: T2 audio requires specific kernel modules and configuration
-
-**Solution**:
-- The apple-t2 module from nixos-hardware should handle this automatically
-- If issues persist, see [T2 Linux Audio Guide](https://wiki.t2linux.org/guides/audio/)
-
-#### Keyboard/TouchBar Issues
-
-**Cause**: T2 keyboard and TouchBar require apple-ib driver
-
-**Solution**:
-- The nixos-hardware apple-t2 module includes necessary drivers
-- If keyboard doesn't work during boot, use USB keyboard for installation
-- After installation, T2 keyboard should work with proper drivers loaded
-
-#### Boot Issues on T2 Macs
-
-**Possible causes**:
-- Secure Boot enabled (T2 chip enforces macOS-only boot by default)
-- Missing EFI boot entries
-
-**Solutions**:
-1. Disable Secure Boot in macOS Recovery:
-   - Restart and hold `Cmd+R` to enter Recovery
-   - Utilities → Startup Security Utility
-   - Set "No Security" and "Allow booting from external media"
-2. Use rEFInd boot manager for easier multi-boot setup
-3. See [T2 Linux Installation Guide](https://wiki.t2linux.org/guides/installation/)
+**Resources:**
+- [T2 Linux Wiki](https://wiki.t2linux.org/) - Comprehensive T2 troubleshooting
+- [T2 Linux Installation Guide](https://wiki.t2linux.org/guides/installation/)
+- [T2 Linux WiFi Guide](https://wiki.t2linux.org/guides/wifi/)
+- [T2 Linux Audio Guide](https://wiki.t2linux.org/guides/audio/)
 
 ## Contributing
 
@@ -499,5 +464,5 @@ This project is provided as-is for educational and personal use.
 - [NixOS ISO Image](https://nixos.wiki/wiki/Creating_a_NixOS_live_CD)
 - [Helix Editor](https://helix-editor.com/)
 - [Neovim](https://neovim.io/)
+- [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) - Official T2 MacBook Pro NixOS installer
 - [T2 Linux Wiki](https://wiki.t2linux.org/) - Comprehensive guide for running Linux on T2 Macs
-- [nixos-hardware](https://github.com/NixOS/nixos-hardware) - Hardware-specific NixOS modules

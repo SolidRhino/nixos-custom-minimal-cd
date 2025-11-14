@@ -9,6 +9,7 @@
 - **flake-parts**: Modular flake organization framework (eliminates duplication)
 - **nixvim**: Declarative Neovim configuration via Nix
 - **nixpkgs**: Main Nix package repository (nixos-unstable channel)
+- **t2linux/nixos-t2-iso**: Upstream T2 MacBook Pro installer base
 
 ## Development Environment
 - **System**: Darwin (macOS) - **Cannot build ISOs natively** (requires Linux)
@@ -22,7 +23,7 @@ inputs = {
   nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   nixvim.url = "github:nix-community/nixvim";
   flake-parts.url = "github:hercules-ci/flake-parts";
-  nixos-hardware.url = "github:NixOS/nixos-hardware";  # For T2 Mac support
+  t2-iso.url = "github:t2linux/nixos-t2-iso";  # T2 Mac installer base
 }
 ```
 
@@ -33,21 +34,14 @@ inputs = {
 - **Formatting**: nixpkgs-fmt for automatic Nix code formatting
 - **Syntax Highlighting**: Treesitter for Nix language
 
-## T2 MacBook Pro Binary Caches
-- **t2linux.cachix.org**: Primary T2 Linux community cache
-- **cache.soopy.moe**: Additional T2 Linux community cache
-- **Configuration Pattern**: Uses three-line pattern in hardware/t2.nix
-  - `extra-trusted-substituters`: Automatic for CI/CD and trusted users
-  - `extra-substituters`: Fallback for non-trusted users
-  - `extra-trusted-public-keys`: Cryptographic package verification
-- **Purpose**: Provides pre-built T2-specific kernel modules and drivers
+## T2 MacBook Pro Support
+The T2 ISO extends [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso), which provides:
 
-## T2-Specific Packages
-- **python3**: Required by firmware extraction script for parsing firmware files
-- **dmg2img**: Converts macOS disk images to standard formats
-- **get-apple-firmware**: Comprehensive firmware extraction tool from t2linux/wiki
-  - Source: https://github.com/t2linux/wiki (commit 360156db)
-  - Extracts WiFi/Bluetooth firmware from macOS for Linux use
-  - Supports multiple methods: EFI partition, macOS volume, recovery image
-  - Uses embedded Python to parse and rename firmware files
-  - Essential for T2 Mac WiFi/Bluetooth functionality on Linux
+- **apple-t2 module**: Hardware-specific kernel modules and drivers
+- **Binary Cache**: t2linux.cachix.org for pre-built T2 packages
+- **Firmware Tools**: get-apple-firmware script for WiFi/Bluetooth firmware extraction
+- **System Packages**: python3, dmg2img for firmware processing
+
+Our customizations add:
+- Custom editor configurations (Helix, Neovim with nixvim)
+- Same system packages as standard ISOs

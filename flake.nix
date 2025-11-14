@@ -14,7 +14,10 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    t2-iso = {
+      url = "github:t2linux/nixos-t2-iso";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ { flake-parts, ... }:

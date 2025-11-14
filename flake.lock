@@ -89,11 +89,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1762847253,
-        "narHash": "sha256-BWWnUUT01lPwCWUvS0p6Px5UOBFeXJ8jR+ZdLX8IbrU=",
+        "lastModified": 1759582739,
+        "narHash": "sha256-spZegilADH0q5OngM86u6NmXxduCNv5eX9vCiUPhOYc=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "899dc449bc6428b9ee6b3b8f771ca2b0ef945ab9",
+        "rev": "3441b5242af7577230a78ffb03542add264179ab",
         "type": "github"
       },
       "original": {
@@ -128,11 +128,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1763109970,
-        "narHash": "sha256-3azi7sNWVxHiUGMPcEwsd3ErYoMEdLRX/JmgoYEe+os=",
+        "lastModified": 1763145270,
+        "narHash": "sha256-d0q5x1oCw6rd4DrEs9PXWyeXXzMKYAAV4uWhYzaasYc=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "6c2ac251d7cfc2416f23257df13c86d84d3eee34",
+        "rev": "3832b56fb6ccd34c6ab8722a8e69de570bd181bd",
         "type": "github"
       },
       "original": {
@@ -167,9 +167,9 @@
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
-        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
-        "nixvim": "nixvim"
+        "nixvim": "nixvim",
+        "t2-iso": "t2-iso"
       }
     },
     "systems": {
@@ -199,6 +199,27 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "t2-iso": {
+      "inputs": {
+        "nixos-hardware": "nixos-hardware",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1759644936,
+        "narHash": "sha256-O4g2S2U1v1Y7bygALkOaGaLcBwC73Ibpwdy3H8WA9bY=",
+        "owner": "t2linux",
+        "repo": "nixos-t2-iso",
+        "rev": "6ca881013c7adbca51a8704f986378239a5f65ed",
+        "type": "github"
+      },
+      "original": {
+        "owner": "t2linux",
+        "repo": "nixos-t2-iso",
         "type": "github"
       }
     }
