@@ -14,6 +14,10 @@ let
         inputs.nixvim.nixosModules.nixvim
         "${self}/configuration.nix"
         "${self}/hardware/t2.nix"
+        # Override filename to create unique T2 ISO derivation
+        {
+          image.fileName = inputs.nixpkgs.lib.mkForce "nixos-minimal-x86_64-t2-custom.iso";
+        }
       ];
     }).config.system.build.isoImage;
 in
