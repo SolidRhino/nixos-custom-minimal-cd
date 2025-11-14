@@ -13,7 +13,9 @@ custom-minimal-cd/
 ├── configuration.nix            # Main system configuration
 ├── flake-parts/                 # Modular flake components
 │   ├── iso.nix                 # ISO builder logic with perSystem
-│   └── t2-iso.nix              # T2 MacBook Pro ISO builder
+│   ├── t2-iso.nix              # T2 MacBook Pro ISO builder
+│   └── pkgs/                   # Package derivations
+│       └── firmware-script.nix # T2 firmware extraction tool
 ├── hardware/                    # Hardware-specific configurations
 │   └── t2.nix                  # T2 chip hardware support
 ├── editors/                     # Editor-specific configurations
@@ -82,11 +84,22 @@ custom-minimal-cd/
 **hardware/t2.nix**
 - T2 MacBook Pro hardware support module
 - Imports `nixos-hardware.nixosModules.apple-t2` for T2 chip support
-- Configures T2 Linux binary cache (t2linux.cachix.org)
-- Includes firmware extraction tools:
-  - `dmg2img` for converting macOS disk images
-  - `get-apple-firmware` script with instructions
+- Configures T2 Linux binary caches (three-line pattern):
+  - `t2linux.cachix.org` (primary)
+  - `cache.soopy.moe` (additional community cache)
+  - Uses extra-trusted-substituters, extra-substituters, extra-trusted-public-keys
+- Includes T2-specific packages:
+  - `python3` (required by firmware script)
+  - `dmg2img` (converts macOS disk images)
+  - `firmware-script` (from flake-parts/pkgs/, extracts WiFi/Bluetooth firmware)
 - Sets platform to x86_64-linux (T2 Macs are Intel only)
+
+**flake-parts/pkgs/firmware-script.nix**
+- Standalone package derivation for T2 firmware extraction
+- Fetches official firmware.sh from t2linux/wiki repository
+- Creates `get-apple-firmware` command in ISO
+- Supports multiple extraction methods (EFI, macOS volume, recovery image)
+- Uses embedded Python to parse and rename firmware files
 
 ### Editor Configurations
 
@@ -107,12 +120,20 @@ custom-minimal-cd/
 ### CI/CD
 
 **.github/workflows/build-iso.yml**
-- GitHub Actions workflow for automated builds
-- Matrix strategy: builds both x86_64 and aarch64 in parallel
-- Uses QEMU for ARM64 emulation on x86_64 runners
-- Steps:
+- GitHub Actions workflow with dual job strategy
+- **Job 1: build-standard** (x86_64, aarch64 in parallel)
+  - Fast builds using pre-built kernels (2-5 minutes)
+  - Uses QEMU for ARM64 emulation on x86_64 runners
+  - No space cleanup needed
+- **Job 2: build-t2** (separate dedicated job)
+  - T2 kernel compilation requires ~90 minutes
+  - Uses GC_DONT_GC=1 to prevent garbage collection during build
+  - Maximizes build space before compilation
+  - Uses --accept-flake-config flag
+  - No QEMU (T2 is x86_64 only)
+- Steps (per job):
   1. Checkout code
-  2. Set up QEMU
+  2. Set up QEMU (standard job only)
   3. Install Nix with flakes
   4. Set up Nix cache
   5. Build ISO for each architecture
@@ -153,11 +174,13 @@ custom-minimal-cd/
 
 ### CI/CD Flow
 1. Push to main or create tag
-2. GitHub Actions starts workflow
-3. Parallel matrix jobs for x86_64 and aarch64
-4. Each job: checkout → setup → build → validate → upload
-5. Artifacts available from Actions tab
-6. Releases created automatically for tags
+2. GitHub Actions starts workflow with two jobs:
+   - **build-standard**: Parallel matrix jobs for x86_64 and aarch64
+   - **build-t2**: Separate dedicated job with GC protection
+3. Each job: checkout → setup → build → validate → upload
+4. T2 job gets full runner resources without competition
+5. Artifacts available from Actions tab (90-day retention)
+6. Releases created automatically for tags (permanent storage)
 
 ## Important Implementation Details
 

@@ -6,88 +6,33 @@
 - Push to main/master branches
 - Git tags (v*)
 - Manual workflow_dispatch
+- Paths-ignore: **.md, docs/**, .serena/memories/**
 
-**Build Strategy:**
-- Matrix uses descriptive target names: x86_64-generic, aarch64-generic, x86_64-t2
-- Target names clarify that "generic" = standard ISOs, "t2" = hardware variant
-- Case statement maps targets to actual Nix package paths
-- QEMU emulation for aarch64 on x86_64 runners
-- Nix with magic cache for performance
-- Uploads to GitHub Actions artifacts (90 days)
-- Uploads to GitHub Releases (permanent) on tags
+**Build Strategy - Dual Jobs:**
 
-**Build Time:**
-- x86_64: ~2-5 minutes (native)
-- x86_64-t2: ~3-7 minutes (native with T2 modules)
-- aarch64: ~20-45 minutes (QEMU emulation)
+### Job 1: build-standard (x86_64, aarch64)
+- Matrix builds in parallel (fast, 2-5 minutes)
+- Use pre-built kernels from cache
+- No space cleanup needed
+- QEMU for aarch64 emulation on x86_64 runners
 
-## Renovate Integration Discovery
+### Job 2: build-t2 (separate job)
+- Dedicated runner for T2 kernel compilation
+- **GC_DONT_GC=1**: Prevents garbage collection during 90+ minute kernel build
+- Maximize build space before compilation
+- Uses --accept-flake-config flag
+- Cleanup result after upload
+- No QEMU (T2 is x86_64 only)
 
-**Key Finding:** Renovate already provides weekly automated builds!
-
-**How it works:**
-1. Renovate creates grouped PR every weekend (`"schedule": ["every weekend"]`)
-2. PR auto-merges if CI passes (`"automerge": true`, `"platformAutomerge": true`)
-3. Auto-merge triggers push to main
-4. Push to main triggers ISO build workflow
-5. Result: **Automatic weekly validation via Renovate**
-
-**Renovate Configuration Details:**
-- `"ignoreTests": false` - Waits for status checks before auto-merge
-- `"prConcurrentLimit": 1` - One PR at a time
-- Groups Nix flake inputs and GitHub Actions updates
-- Auto-merges minor/patch updates
-- Major updates require manual review
-
-## Workflow Naming Convention
-
-**Matrix Variable: `target`** (not `arch`)
-- Uses descriptive names that clarify purpose
-- `x86_64-generic`, `aarch64-generic` = standard ISOs
-- `x86_64-t2` = hardware-specific variant (T2 MacBook Pro)
-- Avoids confusion with actual Nix system architectures
-
-**Why not `arch`:**
-- `x86_64-t2` looked like a system architecture but isn't
-- Mixing real architectures (x86_64-linux) with variant labels was confusing
-- `target` + descriptive names make intent clear
-
-**ISO Filenames:**
-- Keep simple without "generic" suffix for users
-- `nixos-minimal-x86_64-custom.iso` (not x86_64-generic)
-- `nixos-minimal-x86_64-t2-custom.iso` (explicit T2)
-
-## Optimization Implemented: Smart Build Triggers
+**T2 Disk Space Protection (Dual Strategy):**
+1. **Separate Job**: T2 gets dedicated runner (~14GB space, no competition)
+2. **GC Protection**: GC_DONT_GC=1 prevents deletion of intermediate build artifacts
 
 **Rationale:**
-- Skip builds for documentation-only changes
-- Keep automatic builds for code changes
-- Renovate ensures weekly validation via dependency PRs
-- Most commits are mixed (code + docs), so builds still run normally
-
-**Implemented Trigger Configuration:**
-```yaml
-on:
-  push:
-    branches:
-      - main
-      - master
-    tags:
-      - 'v*'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.serena/memories/**'
-  
-  workflow_dispatch:
-```
-
-**Expected Benefits:**
-- ✅ 20-40% fewer builds (skip docs-only commits)
-- ✅ Automatic validation for code changes
-- ✅ Weekly validation via Renovate
-- ✅ Releases still automated (tags)
-- ✅ Manual trigger available anytime
+- T2 builds custom patched kernel (massive, 90+ minutes)
+- Standard builds use pre-built kernels (fast, 2-5 minutes)
+- Previous parallel matrix exhausted disk space during T2 kernel compilation
+- Matches proven t2linux/nixos-t2-iso build strategy
 
 ## Build Space Optimization
 

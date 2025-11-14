@@ -15,6 +15,7 @@ This project uses [flake-parts](https://flake.parts/) to eliminate duplication a
 - **flake.nix**: Entry point that imports flake-parts modules
 - **flake-parts/iso.nix**: Contains the `perSystem` configuration and ISO builder logic
 - **flake-parts/t2-iso.nix**: T2 MacBook Pro-specific ISO builder
+- **flake-parts/pkgs/**: Package derivations (firmware-script.nix for T2)
 - **configuration.nix**: System configuration imported by ISO module
 - **editors/**: Modular editor configurations (helix.nix, neovim.nix)
 - **hardware/**: Hardware-specific configurations (t2.nix for T2 Macs)
@@ -34,10 +35,11 @@ The flake defines `systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "a
 - `packages.<current-system>.iso` - Auto-detected architecture (when available)
 
 **T2 Support**: The T2 ISO uses nixos-hardware's apple-t2 module and includes:
-- WiFi/Bluetooth firmware extraction tools
+- WiFi/Bluetooth firmware extraction tools (python3 + firmware-script package)
 - T2-specific kernel modules and drivers
 - Audio, keyboard, and TouchBar support
-- T2 Linux community binary cache for faster builds
+- T2 Linux community binary caches (t2linux.cachix.org + cache.soopy.moe) for faster builds
+- Firmware extraction script from t2linux/wiki (get-apple-firmware command)
 
 **Important**: Building cross-architecture ISOs requires appropriate builders or emulation. GitHub Actions handles this automatically.
 
@@ -79,7 +81,11 @@ nix fmt
 
 ### CI/CD Testing
 
-The GitHub Actions workflow (`.github/workflows/build-iso.yml`) builds all three ISOs (x86_64, aarch64, x86_64-t2) in parallel. Trigger manually via:
+The GitHub Actions workflow (`.github/workflows/build-iso.yml`) uses a dual job strategy:
+- **build-standard**: x86_64 and aarch64 ISOs build in parallel (fast, 2-5 minutes)
+- **build-t2**: T2 ISO builds separately with GC protection (~90 minutes for kernel compilation)
+
+Trigger manually via:
 
 ```bash
 # Push to trigger automatic build
@@ -134,8 +140,13 @@ The `pkgs.stdenv.hostPlatform.system` dynamically sets the architecture name in 
 
 ### GitHub Actions Strategy
 
-- Uses `strategy.matrix.arch` to build both architectures in parallel
+**Dual Job Approach:**
+- **build-standard job**: Uses matrix strategy for x86_64 and aarch64 (parallel, fast)
+- **build-t2 job**: Dedicated runner with GC_DONT_GC=1 to prevent garbage collection during 90-minute kernel build
+
+**Infrastructure:**
 - Employs DeterminateSystems nix-installer and magic-nix-cache for performance
+- T2 job maximizes build space before kernel compilation
 - Validates ISO size (must be >100MB) before upload
 - Artifacts retained for 90 days, releases are permanent
 
@@ -178,14 +189,21 @@ For T2 ISOs (`flake-parts/t2-iso.nix`), an additional module is imported:
 **Key Components**:
 - **nixos-hardware dependency**: Added to flake inputs for apple-t2 module
 - **hardware/t2.nix**: Imports `nixos-hardware.nixosModules.apple-t2` and configures:
-  - T2 Linux binary cache (t2linux.cachix.org)
-  - Firmware extraction tools (`get-apple-firmware` script)
-  - dmg2img for macOS disk image conversion
+  - T2 Linux binary caches (three-line pattern for max compatibility):
+    - t2linux.cachix.org (primary)
+    - cache.soopy.moe (additional community cache)
+    - Uses extra-trusted-substituters + extra-substituters + extra-trusted-public-keys
+  - System packages: python3, dmg2img, firmware-script
+- **flake-parts/pkgs/firmware-script.nix**: Standalone package that:
+  - Fetches official firmware.sh from t2linux/wiki repository
+  - Creates `get-apple-firmware` command
+  - Supports multiple extraction methods (EFI, macOS volume, recovery image)
+  - Uses embedded Python to parse and rename firmware files
 - **flake-parts/t2-iso.nix**: Separate ISO builder that passes `nixos-hardware` as specialArgs
 
-**Firmware Requirement**: T2 Macs need firmware extracted from macOS for WiFi/Bluetooth. The ISO includes a `get-apple-firmware` helper script with instructions.
+**Firmware Requirement**: T2 Macs need firmware extracted from macOS for WiFi/Bluetooth. The ISO includes python3 and the comprehensive `get-apple-firmware` tool from the t2linux community.
 
-**Binary Cache**: Uses community cache to avoid rebuilding T2-specific packages (kernel modules, drivers).
+**Binary Caches**: Uses two T2 Linux community caches to avoid rebuilding T2-specific packages (kernel modules, drivers). The three-line configuration pattern ensures caches work for both trusted and non-trusted users.
 
 ## Testing Approach
 

@@ -112,17 +112,30 @@ Builds are automatically triggered on:
 
 ### Build Strategy
 
-- All three ISOs (x86_64, aarch64, T2) build in **parallel** for speed
+**Dual Job Approach for Optimal Performance:**
+
+**Job 1: Standard ISOs (build-standard)**
+- x86_64 and aarch64 build in **parallel** for speed
+- Use pre-built kernels from cache
 - **QEMU emulation** enables aarch64 builds on x86_64 runners
+- Fast builds: 2-5 minutes each
+
+**Job 2: T2 ISO (build-t2)**
+- Builds separately with dedicated runner resources
+- T2 requires custom kernel compilation (~90 minutes)
+- Uses `GC_DONT_GC=1` to prevent garbage collection during long build
+- Maximizes build space before kernel compilation
+
+**Common Infrastructure:**
 - **Nix caching** via GitHub Actions reduces build times
 - **Validation tests** ensure ISO integrity before upload
 - **Artifacts** available for all builds (90-day retention)
 - **Releases** created automatically for tagged versions
 
 **Build Times:**
-- x86_64 builds: ~2-5 minutes (native)
-- x86_64-t2 builds: ~3-7 minutes (native with T2 modules)
+- x86_64 builds: ~2-5 minutes (native, pre-built kernel)
 - aarch64 builds: ~20-45 minutes (QEMU emulation overhead)
+- x86_64-t2 builds: ~90 minutes (custom kernel compilation with T2 patches)
 
 ### Accessing Build Artifacts
 
@@ -308,19 +321,21 @@ qemu-system-aarch64 \
 custom-minimal-cd/
 ├── .github/
 │   └── workflows/
-│       └── build-iso.yml       # GitHub Actions workflow
+│       └── build-iso.yml           # GitHub Actions workflow (dual job strategy)
 ├── editors/
-│   ├── helix.nix              # Helix editor configuration
-│   └── neovim.nix             # Neovim editor configuration
+│   ├── helix.nix                  # Helix editor configuration
+│   └── neovim.nix                 # Neovim editor configuration
 ├── flake-parts/
-│   ├── iso.nix                # ISO configuration module (flake-parts)
-│   └── t2-iso.nix             # T2 MacBook Pro ISO module
+│   ├── iso.nix                    # ISO configuration module (flake-parts)
+│   ├── t2-iso.nix                 # T2 MacBook Pro ISO module
+│   └── pkgs/
+│       └── firmware-script.nix    # T2 firmware extraction tool package
 ├── hardware/
-│   └── t2.nix                 # T2 chip hardware configuration
-├── flake.nix                  # Main flake entry point (uses flake-parts)
-├── flake.lock                 # Flake dependencies lock file
-├── configuration.nix          # System configuration
-└── README.md                  # This file
+│   └── t2.nix                     # T2 chip hardware configuration
+├── flake.nix                      # Main flake entry point (uses flake-parts)
+├── flake.lock                     # Flake dependencies lock file
+├── configuration.nix              # System configuration
+└── README.md                      # This file
 ```
 
 ## Workflow
