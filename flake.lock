@@ -89,11 +89,11 @@
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1759582739,
-        "narHash": "sha256-spZegilADH0q5OngM86u6NmXxduCNv5eX9vCiUPhOYc=",
+        "lastModified": 1762847253,
+        "narHash": "sha256-BWWnUUT01lPwCWUvS0p6Px5UOBFeXJ8jR+ZdLX8IbrU=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "3441b5242af7577230a78ffb03542add264179ab",
+        "rev": "899dc449bc6428b9ee6b3b8f771ca2b0ef945ab9",
         "type": "github"
       },
       "original": {
@@ -167,6 +167,7 @@
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
+        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
         "t2-iso": "t2-iso"
@@ -204,7 +205,9 @@
     },
     "t2-iso": {
       "inputs": {
-        "nixos-hardware": "nixos-hardware",
+        "nixos-hardware": [
+          "nixos-hardware"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]

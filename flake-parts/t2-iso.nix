@@ -8,13 +8,14 @@
       packages = lib.optionalAttrs (system == "x86_64-linux") {
         iso-t2 = (lib.nixosSystem {
           inherit system;
+          specialArgs = { nixos-hardware = inputs.nixos-hardware; };
           modules = [
             # Base T2 ISO from t2linux (includes apple-t2 module, firmware tools, binary caches)
             {
               imports = [
                 "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
                 "${inputs.nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
-                inputs.t2-iso.nixosModules.apple-t2
+                inputs.nixos-hardware.nixosModules.apple-t2
               ];
 
               # T2 binary caches (from t2linux)
