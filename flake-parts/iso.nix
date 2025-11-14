@@ -13,13 +13,21 @@ let
     }).config.system.build.isoImage;
 in
 {
-  perSystem = { system, ... }: {
-    packages = {
-      # Main ISO package - builds for the current system
-      iso = mkIso system;
+  perSystem = { system, pkgs, lib, ... }:
+    let
+      isLinux = lib.hasSuffix "-linux" system;
+    in
+    {
+      # ISO packages only available on Linux systems
+      packages = lib.optionalAttrs isLinux {
+        # Main ISO package - builds for the current system
+        iso = mkIso system;
 
-      # Default package points to iso
-      default = mkIso system;
+        # Default package points to iso
+        default = mkIso system;
+      };
+
+      # Formatter available on all systems (including Darwin)
+      formatter = pkgs.nixpkgs-fmt;
     };
-  };
 }

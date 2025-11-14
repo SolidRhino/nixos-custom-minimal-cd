@@ -18,7 +18,8 @@
   outputs = inputs @ { flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       # Systems to build for
-      systems = [ "x86_64-linux" "aarch64-linux" ];
+      # ISOs only build on Linux, but dev tools work on Darwin too
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
       # Import flake-parts modules
       imports = [
