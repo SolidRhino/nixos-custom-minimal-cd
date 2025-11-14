@@ -30,29 +30,39 @@
 
   # T2-specific system packages
   environment.systemPackages = with pkgs; [
+    # Python 3 - Required by firmware extraction script
+    python3
+
     # Tool to convert Apple disk images to standard formats
+    # Required by firmware script for processing macOS recovery images
     dmg2img
 
     # Firmware extraction script for T2 devices
-    # Users run this to extract firmware from macOS
-    (pkgs.writeShellScriptBin "get-apple-firmware" ''
-      # Firmware extraction script for T2 Linux
-      # Based on: https://wiki.t2linux.org/guides/wifi/
+    # Comprehensive tool that extracts WiFi/Bluetooth firmware from macOS
+    # Uses python3 to parse and rename firmware files for Linux compatibility
+    (pkgs.stdenvNoCC.mkDerivation {
+      pname = "get-apple-firmware";
+      version = "360156db52c013dbdac0ef9d6e2cebbca46b955b";
 
-      echo "=== Apple T2 Firmware Extraction Tool ==="
-      echo ""
-      echo "This script helps extract firmware from macOS for use in Linux."
-      echo "You need a macOS partition or recovery image to extract firmware."
-      echo ""
-      echo "For detailed instructions, visit:"
-      echo "https://wiki.t2linux.org/guides/wifi/"
-      echo ""
-      echo "Common firmware locations on macOS:"
-      echo "  WiFi/Bluetooth: /usr/share/firmware/wifi/"
-      echo "  Audio: /System/Library/Extensions/"
-      echo ""
-      echo "After extraction, copy firmware to /lib/firmware/ in NixOS"
-    '')
+      src = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/t2linux/wiki/360156db52c013dbdac0ef9d6e2cebbca46b955b/docs/tools/firmware.sh";
+        hash = "sha256-IL7omNdXROG402N2K9JfweretTnQujY67wKKC8JgxBo=";
+      };
+
+      dontUnpack = true;
+
+      installPhase = ''
+        mkdir -p $out/bin
+        cp $src $out/bin/get-apple-firmware
+        chmod +x $out/bin/get-apple-firmware
+      '';
+
+      meta = with lib; {
+        description = "A script to get needed firmware for T2 Linux devices";
+        license = licenses.mit;
+        platforms = platforms.linux;
+      };
+    })
   ];
 
   # Platform constraint: T2 Macs are x86_64 only
