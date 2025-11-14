@@ -7,14 +7,24 @@
     nixos-hardware.nixosModules.apple-t2
   ];
 
-  # T2 binary cache for pre-built packages
-  # Significantly speeds up builds by using community cache
+  # T2 binary caches for pre-built packages
+  # Significantly speeds up builds by using community caches
+  # Using three-line pattern for maximum compatibility:
+  # - extra-trusted-substituters: Works automatically for trusted users (CI/CD)
+  # - extra-substituters: Falls back for non-trusted users
+  # - extra-trusted-public-keys: Cryptographic verification
   nix.settings = {
-    substituters = [
+    extra-trusted-substituters = [
       "https://t2linux.cachix.org"
+      "https://cache.soopy.moe"
     ];
-    trusted-public-keys = [
+    extra-substituters = [
+      "https://t2linux.cachix.org"
+      "https://cache.soopy.moe"
+    ];
+    extra-trusted-public-keys = [
       "t2linux.cachix.org-1:P1TzTMk1US9G4Q7+8NpfnzYz3LU6iYY3D8L1u9mD6P8="
+      "cache.soopy.moe-1:0RZVsQeR+GOh0VQI9rvnHz55nVXkFardDqfm4+afjPo="
     ];
   };
 
