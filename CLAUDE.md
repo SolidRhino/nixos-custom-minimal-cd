@@ -194,6 +194,27 @@ For T2 ISOs (`flake-parts/t2-iso.nix`), an additional module is imported:
 3. **ISO boot test**: Use VM (QEMU, VirtualBox, UTM) or physical hardware
 4. **SSH test**: Boot ISO, verify network and SSH access with `installer` password
 
+## Project Conventions
+
+### Git Commit Messages
+
+**IMPORTANT**: Never add Claude Code attribution to git commits.
+
+The following lines must **NOT** be included in commit messages:
+```
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+This is explicitly forbidden per project policy.
+
+**Commit Message Format**:
+- Use conventional commits: `feat:`, `fix:`, `docs:`, `config:`, `ci:`
+- Write descriptive, meaningful messages
+- Include context and rationale for changes
+- Keep first line under 72 characters
+
 ## Troubleshooting
 
 ### Build Errors

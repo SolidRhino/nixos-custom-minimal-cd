@@ -100,6 +100,15 @@ custom-minimal-cd/
 - **Configuration changes**: `config: adjust W`
 - **CI/CD changes**: `ci: modify V`
 
+### Commit Message Rules
+**IMPORTANT**: Never add Claude Code attribution to git commits:
+```
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+This is explicitly forbidden per project policy.
+
 ## Documentation
 
 ### Inline Comments
