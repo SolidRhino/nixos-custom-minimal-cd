@@ -13,6 +13,8 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
   outputs = inputs @ { flake-parts, ... }:
@@ -24,6 +26,7 @@
       # Import flake-parts modules
       imports = [
         ./flake-parts/iso.nix
+        ./flake-parts/t2-iso.nix
       ];
     };
 }

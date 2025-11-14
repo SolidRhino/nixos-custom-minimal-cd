@@ -22,6 +22,7 @@ inputs = {
   nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   nixvim.url = "github:nix-community/nixvim";
   flake-parts.url = "github:hercules-ci/flake-parts";
+  nixos-hardware.url = "github:NixOS/nixos-hardware";  # For T2 Mac support
 }
 ```
 

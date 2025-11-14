@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        arch: [x86_64-linux, aarch64-linux]
+        target: [x86_64-generic, aarch64-generic, x86_64-t2]
       fail-fast: false
 
     steps:
@@ -44,19 +44,46 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Build ISO for ${{ matrix.arch }}
+      - name: Build ISO for ${{ matrix.target }}
         run: |
-          nix build .#packages.${{ matrix.arch }}.iso --print-build-logs
+          case "${{ matrix.target }}" in
+            x86_64-generic)
+              nix build .#packages.x86_64-linux.iso --print-build-logs
+              ;;
+            aarch64-generic)
+              nix build .#packages.aarch64-linux.iso --print-build-logs
+              ;;
+            x86_64-t2)
+              nix build .#packages.x86_64-linux.iso-t2 --print-build-logs
+              ;;
+            *)
+              echo "Unknown target: ${{ matrix.target }}"
+              exit 1
+              ;;
+          esac
 
       - name: Get ISO filename
         id: iso-info
         run: |
-          ARCH=$(echo "${{ matrix.arch }}" | cut -d'-' -f1)
+          case "${{ matrix.target }}" in
+            x86_64-generic)
+              ISO_NAME="nixos-minimal-x86_64-custom.iso"
+              ;;
+            aarch64-generic)
+              ISO_NAME="nixos-minimal-aarch64-custom.iso"
+              ;;
+            x86_64-t2)
+              ISO_NAME="nixos-minimal-x86_64-t2-custom.iso"
+              ;;
+            *)
+              echo "Unknown target: ${{ matrix.target }}"
+              exit 1
+              ;;
+          esac
+
           ISO_PATH=$(readlink -f result/iso/*.iso)
-          ISO_NAME="nixos-minimal-${ARCH}-custom.iso"
           echo "iso_path=${ISO_PATH}" >> $GITHUB_OUTPUT
           echo "iso_name=${ISO_NAME}" >> $GITHUB_OUTPUT
-          echo "arch=${ARCH}" >> $GITHUB_OUTPUT
 
       - name: Validate ISO
         run: |

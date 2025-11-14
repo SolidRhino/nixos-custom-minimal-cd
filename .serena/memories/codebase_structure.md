@@ -12,7 +12,10 @@ custom-minimal-cd/
 ├── flake.lock                   # Dependency lock file (auto-generated)
 ├── configuration.nix            # Main system configuration
 ├── flake-parts/                 # Modular flake components
-│   └── iso.nix                 # ISO builder logic with perSystem
+│   ├── iso.nix                 # ISO builder logic with perSystem
+│   └── t2-iso.nix              # T2 MacBook Pro ISO builder
+├── hardware/                    # Hardware-specific configurations
+│   └── t2.nix                  # T2 chip hardware support
 ├── editors/                     # Editor-specific configurations
 │   ├── helix.nix               # Helix editor setup
 │   └── neovim.nix              # Neovim with nixvim configuration
@@ -31,8 +34,9 @@ custom-minimal-cd/
 
 **flake.nix**
 - Entry point for the Nix flake
-- Defines inputs (nixpkgs, nixvim, flake-parts)
-- Specifies supported systems: `x86_64-linux`, `aarch64-linux`
+- Defines inputs (nixpkgs, nixvim, flake-parts, nixos-hardware)
+- nixos-hardware does NOT use `inputs.nixpkgs.follows` (doesn't have that input)
+- Specifies supported systems: `x86_64-linux`, `aarch64-linux` (plus Darwin for dev tools)
 - Imports flake-parts modules
 - **Key Concept**: Uses flake-parts.lib.mkFlake for modular organization
 
@@ -63,6 +67,26 @@ custom-minimal-cd/
   - Includes custom configuration.nix
   - Returns ISO package
 - Creates `packages.<system>.iso` outputs automatically
+
+**flake-parts/t2-iso.nix**
+- T2 MacBook Pro-specific ISO builder
+- Only creates output for x86_64-linux (T2 Macs are Intel-based)
+- Defines `mkT2Iso` helper function that:
+  - Imports nixos-hardware as specialArgs
+  - Combines base ISO + nixvim + configuration.nix + hardware/t2.nix
+  - Returns T2-enabled ISO package
+- Creates `packages.x86_64-linux.iso-t2` output
+
+### Hardware Configurations
+
+**hardware/t2.nix**
+- T2 MacBook Pro hardware support module
+- Imports `nixos-hardware.nixosModules.apple-t2` for T2 chip support
+- Configures T2 Linux binary cache (t2linux.cachix.org)
+- Includes firmware extraction tools:
+  - `dmg2img` for converting macOS disk images
+  - `get-apple-firmware` script with instructions
+- Sets platform to x86_64-linux (T2 Macs are Intel only)
 
 ### Editor Configurations
 

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A flake-based NixOS minimal installation ISO with enhanced tooling for quick installations, repairs, and multi-machine deployments. The project uses **flake-parts** for modular organization and supports both x86_64 and aarch64 architectures with automated CI/CD builds.
+A flake-based NixOS minimal installation ISO with enhanced tooling for quick installations, repairs, and multi-machine deployments. The project uses **flake-parts** for modular organization and supports x86_64, aarch64, and x86_64-t2 (MacBook Pro with T2 chip) architectures with automated CI/CD builds.
 
 ## Core Architecture
 
@@ -14,8 +14,10 @@ This project uses [flake-parts](https://flake.parts/) to eliminate duplication a
 
 - **flake.nix**: Entry point that imports flake-parts modules
 - **flake-parts/iso.nix**: Contains the `perSystem` configuration and ISO builder logic
+- **flake-parts/t2-iso.nix**: T2 MacBook Pro-specific ISO builder
 - **configuration.nix**: System configuration imported by ISO module
 - **editors/**: Modular editor configurations (helix.nix, neovim.nix)
+- **hardware/**: Hardware-specific configurations (t2.nix for T2 Macs)
 
 **Key Pattern**: The `mkIso` helper function in `flake-parts/iso.nix` creates ISO images for each system by combining:
 1. Base minimal installation ISO module from nixpkgs
@@ -24,11 +26,18 @@ This project uses [flake-parts](https://flake.parts/) to eliminate duplication a
 
 ### Multi-Architecture Support
 
-The flake defines `systems = [ "x86_64-linux" "aarch64-linux" ]` to support both Intel/AMD and ARM architectures. The `perSystem` function in flake-parts automatically creates packages for each system:
+The flake defines `systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ]` to support Intel/AMD, ARM architectures, and development on Darwin. The `perSystem` function in flake-parts automatically creates packages for each system:
 
 - `packages.x86_64-linux.iso` - Intel/AMD ISO
 - `packages.aarch64-linux.iso` - ARM ISO
-- `packages.<current-system>.iso` - Auto-detected architecture
+- `packages.x86_64-linux.iso-t2` - T2 MacBook Pro ISO (x86_64 with T2 hardware support)
+- `packages.<current-system>.iso` - Auto-detected architecture (when available)
+
+**T2 Support**: The T2 ISO uses nixos-hardware's apple-t2 module and includes:
+- WiFi/Bluetooth firmware extraction tools
+- T2-specific kernel modules and drivers
+- Audio, keyboard, and TouchBar support
+- T2 Linux community binary cache for faster builds
 
 **Important**: Building cross-architecture ISOs requires appropriate builders or emulation. GitHub Actions handles this automatically.
 
@@ -44,7 +53,12 @@ nix build .#iso
 nix build .#packages.x86_64-linux.iso
 nix build .#packages.aarch64-linux.iso
 
-# Output location: result/iso/nixos-minimal-{arch}-custom.iso
+# Build T2 MacBook Pro ISO (only on x86_64 Linux)
+nix build .#packages.x86_64-linux.iso-t2
+
+# Output locations:
+# - Standard: result/iso/nixos-minimal-{arch}-custom.iso
+# - T2: result/iso/nixos-minimal-x86_64-linux-custom.iso
 ```
 
 ### Development Workflow
@@ -65,7 +79,7 @@ nix fmt
 
 ### CI/CD Testing
 
-The GitHub Actions workflow (`.github/workflows/build-iso.yml`) builds both architectures in parallel. Trigger manually via:
+The GitHub Actions workflow (`.github/workflows/build-iso.yml`) builds all three ISOs (x86_64, aarch64, x86_64-t2) in parallel. Trigger manually via:
 
 ```bash
 # Push to trigger automatic build
@@ -150,6 +164,28 @@ The order in `flake-parts/iso.nix` matters:
 1. Base minimal installation ISO (provides foundation)
 2. nixvim module (adds Neovim declarative configuration)
 3. Custom configuration.nix (overrides and extends)
+
+For T2 ISOs (`flake-parts/t2-iso.nix`), an additional module is imported:
+1. Base minimal installation ISO
+2. nixvim module
+3. Custom configuration.nix
+4. **hardware/t2.nix** (T2-specific hardware support)
+
+### T2-Specific Implementation
+
+**Architecture**: T2 MacBook Pros are x86_64 only (Intel-based, 2018-2020 models).
+
+**Key Components**:
+- **nixos-hardware dependency**: Added to flake inputs for apple-t2 module
+- **hardware/t2.nix**: Imports `nixos-hardware.nixosModules.apple-t2` and configures:
+  - T2 Linux binary cache (t2linux.cachix.org)
+  - Firmware extraction tools (`get-apple-firmware` script)
+  - dmg2img for macOS disk image conversion
+- **flake-parts/t2-iso.nix**: Separate ISO builder that passes `nixos-hardware` as specialArgs
+
+**Firmware Requirement**: T2 Macs need firmware extracted from macOS for WiFi/Bluetooth. The ISO includes a `get-apple-firmware` helper script with instructions.
+
+**Binary Cache**: Uses community cache to avoid rebuilding T2-specific packages (kernel modules, drivers).
 
 ## Testing Approach
 
