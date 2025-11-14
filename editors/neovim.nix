@@ -100,6 +100,11 @@
       };
     };
 
+    # Web-devicons - File icons (explicitly enabled to avoid auto-enable deprecation)
+    plugins.web-devicons = {
+      enable = true;
+    };
+
     # Telescope - Fuzzy finder
     plugins.telescope = {
       enable = true;
@@ -126,12 +131,14 @@
     # Neo-tree - File explorer (LazyVim style)
     plugins.neo-tree = {
       enable = true;
-      enableGitStatus = true;
-      enableDiagnostics = true;
-      closeIfLastWindow = true;
-      window = {
-        width = 30;
-        position = "left";
+      settings = {
+        enable_git_status = true;
+        enable_diagnostics = true;
+        close_if_last_window = true;
+        window = {
+          width = 30;
+          position = "left";
+        };
       };
     };
 
@@ -177,78 +184,80 @@
     # Alpha - Startup dashboard
     plugins.alpha = {
       enable = true;
-      layout = [
-        {
-          type = "padding";
-          val = 2;
-        }
-        {
-          type = "text";
-          val = [
-            "███╗   ██╗██╗██╗  ██╗ ██████╗ ███████╗"
-            "████╗  ██║██║╚██╗██╔╝██╔═══██╗██╔════╝"
-            "██╔██╗ ██║██║ ╚███╔╝ ██║   ██║███████╗"
-            "██║╚██╗██║██║ ██╔██╗ ██║   ██║╚════██║"
-            "██║ ╚████║██║██╔╝ ██╗╚██████╔╝███████║"
-            "╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝"
-          ];
-          opts = {
-            position = "center";
-            hl = "Type";
-          };
-        }
-        {
-          type = "padding";
-          val = 2;
-        }
-        {
-          type = "group";
-          val = [
-            {
-              type = "button";
-              val = "  Find file";
-              on_press = { __raw = "function() require('telescope.builtin').find_files() end"; };
-              opts = {
-                shortcut = "SPC ff";
-                keymap = ["n" "<leader>ff" ":Telescope find_files<CR>" { noremap = true; silent = true; }];
-                position = "center";
-                cursor = 3;
-                width = 50;
-                align_shortcut = "right";
-                hl_shortcut = "Keyword";
-              };
-            }
-            {
-              type = "button";
-              val = "  New file";
-              on_press = { __raw = "function() vim.cmd[[ene]] end"; };
-              opts = {
-                shortcut = "SPC n";
-                keymap = ["n" "<leader>fn" ":ene<CR>" { noremap = true; silent = true; }];
-                position = "center";
-                cursor = 3;
-                width = 50;
-                align_shortcut = "right";
-                hl_shortcut = "Keyword";
-              };
-            }
-            {
-              type = "button";
-              val = "  Quit";
-              on_press = { __raw = "function() vim.cmd[[qa]] end"; };
-              opts = {
-                shortcut = "q";
-                keymap = ["n" "q" ":qa<CR>" { noremap = true; silent = true; }];
-                position = "center";
-                cursor = 3;
-                width = 50;
-                align_shortcut = "right";
-                hl_shortcut = "Keyword";
-              };
-            }
-          ];
-        }
-      ];
+      settings = {
+        layout = [
+          {
+            type = "padding";
+            val = 2;
+          }
+          {
+            type = "text";
+            val = [
+              "███╗   ██╗██╗██╗  ██╗ ██████╗ ███████╗"
+              "████╗  ██║██║╚██╗██╔╝██╔═══██╗██╔════╝"
+              "██╔██╗ ██║██║ ╚███╔╝ ██║   ██║███████╗"
+              "██║╚██╗██║██║ ██╔██╗ ██║   ██║╚════██║"
+              "██║ ╚████║██║██╔╝ ██╗╚██████╔╝███████║"
+              "╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝"
+            ];
+            opts = {
+              position = "center";
+              hl = "Type";
+            };
+          }
+          {
+            type = "padding";
+            val = 2;
+          }
+          {
+            type = "group";
+            val = [
+              {
+                type = "button";
+                val = "  Find file";
+                on_press = { __raw = "function() require('telescope.builtin').find_files() end"; };
+                opts = {
+                  shortcut = "SPC ff";
+                  keymap = ["n" "<leader>ff" ":Telescope find_files<CR>" { noremap = true; silent = true; }];
+                  position = "center";
+                  cursor = 3;
+                  width = 50;
+                  align_shortcut = "right";
+                  hl_shortcut = "Keyword";
+                };
+              }
+              {
+                type = "button";
+                val = "  New file";
+                on_press = { __raw = "function() vim.cmd[[ene]] end"; };
+                opts = {
+                  shortcut = "SPC n";
+                  keymap = ["n" "<leader>fn" ":ene<CR>" { noremap = true; silent = true; }];
+                  position = "center";
+                  cursor = 3;
+                  width = 50;
+                  align_shortcut = "right";
+                  hl_shortcut = "Keyword";
+                };
+              }
+              {
+                type = "button";
+                val = "  Quit";
+                on_press = { __raw = "function() vim.cmd[[qa]] end"; };
+                opts = {
+                  shortcut = "q";
+                  keymap = ["n" "q" ":qa<CR>" { noremap = true; silent = true; }];
+                  position = "center";
+                  cursor = 3;
+                  width = 50;
+                  align_shortcut = "right";
+                  hl_shortcut = "Keyword";
+                };
+              }
+            ];
+          }
+        ];
+      };
     };
 
     # Aerial - Code outline and navigation
