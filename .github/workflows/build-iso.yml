@@ -17,27 +17,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  # Standard ISOs build in parallel (fast, use pre-built kernels)
+  build-standard:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        target: [x86_64-generic, aarch64-generic, x86_64-t2]
+        target: [x86_64-generic, aarch64-generic]
       fail-fast: false
 
     steps:
-      - name: Maximize build space
-        uses: AdityaGarg8/remove-unwanted-software@master
-        with:
-          remove-android: 'true'
-          remove-dotnet: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
-          remove-large-packages: 'true'
-          remove-cached-tools: 'true'
-          remove-swapfile: 'true'
-      
       - name: Checkout repository
         uses: actions/checkout@v5
 
@@ -65,9 +54,6 @@ jobs:
             aarch64-generic)
               nix build .#packages.aarch64-linux.iso --print-build-logs
               ;;
-            x86_64-t2)
-              nix build .#packages.x86_64-linux.iso-t2 --print-build-logs
-              ;;
             *)
               echo "Unknown target: ${{ matrix.target }}"
               exit 1
@@ -83,9 +69,6 @@ jobs:
               ;;
             aarch64-generic)
               ISO_NAME="nixos-minimal-aarch64-custom.iso"
-              ;;
-            x86_64-t2)
-              ISO_NAME="nixos-minimal-x86_64-t2-custom.iso"
               ;;
             *)
               echo "Unknown target: ${{ matrix.target }}"
@@ -137,3 +120,93 @@ jobs:
           files: ${{ steps.iso-info.outputs.iso_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # T2 ISO builds separately with special handling for kernel compilation
+  build-t2:
+    runs-on: ubuntu-latest
+
+    # Disable automatic garbage collection during kernel build
+    env:
+      GC_DONT_GC: 1
+
+    steps:
+      - name: Maximize build space
+        uses: AdityaGarg8/remove-unwanted-software@master
+        with:
+          remove-android: 'true'
+          remove-dotnet: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+          remove-large-packages: 'true'
+          remove-cached-tools: 'true'
+          remove-swapfile: 'true'
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build T2 ISO
+        run: |
+          nix build .#packages.x86_64-linux.iso-t2 --accept-flake-config --print-build-logs
+
+      - name: Get ISO filename
+        id: iso-info
+        run: |
+          ISO_NAME="nixos-minimal-x86_64-t2-custom.iso"
+          ISO_PATH=$(readlink -f result/iso/*.iso)
+          echo "iso_path=${ISO_PATH}" >> $GITHUB_OUTPUT
+          echo "iso_name=${ISO_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Validate ISO
+        run: |
+          ISO_PATH="${{ steps.iso-info.outputs.iso_path }}"
+
+          # Check if ISO exists
+          if [ ! -f "$ISO_PATH" ]; then
+            echo "Error: ISO file not found at $ISO_PATH"
+            exit 1
+          fi
+
+          # Check ISO size (should be > 100MB)
+          ISO_SIZE=$(stat -c%s "$ISO_PATH")
+          MIN_SIZE=$((100 * 1024 * 1024))
+          if [ $ISO_SIZE -lt $MIN_SIZE ]; then
+            echo "Error: ISO size ($ISO_SIZE bytes) is too small"
+            exit 1
+          fi
+
+          echo "✅ ISO validation passed"
+          echo "   File: $ISO_PATH"
+          echo "   Size: $(numfmt --to=iec-i --suffix=B $ISO_SIZE)"
+
+      - name: Rename ISO
+        run: |
+          cp "${{ steps.iso-info.outputs.iso_path }}" "${{ steps.iso-info.outputs.iso_name }}"
+
+      - name: Upload to GitHub Actions Artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ steps.iso-info.outputs.iso_name }}
+          path: ${{ steps.iso-info.outputs.iso_name }}
+          retention-days: 90
+
+      - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.iso-info.outputs.iso_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup build result
+        if: always()
+        run: rm -rf result
