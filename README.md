@@ -11,7 +11,7 @@ A flake-based minimal NixOS installation ISO with enhanced tooling for quick ins
 - **SSH Access**: Enabled with password authentication (password: `installer`)
 - **Networking**: DHCP auto-configuration
 - **Flakes**: Experimental features permanently enabled
-- **Multi-Architecture**: Supports x86_64, aarch64 (ARM64), and x86_64-t2 (MacBook Pro with T2 chip)
+- **Multi-Architecture**: Supports x86_64 and aarch64 (ARM64)
 - **Automated Builds**: GitHub Actions CI/CD pipeline
 
 ## Quick Start
@@ -25,7 +25,6 @@ Pre-built ISOs are available from:
 ISO filenames:
 - `nixos-minimal-x86_64-custom.iso` (for Intel/AMD 64-bit)
 - `nixos-minimal-aarch64-custom.iso` (for ARM 64-bit)
-- `nixos-minimal-x86_64-t2-custom.iso` (for MacBook Pro with T2 chip)
 
 ### Boot the ISO
 
@@ -74,23 +73,6 @@ nix build .#packages.aarch64-linux.iso
 # Note: Building aarch64 on x86_64 requires binfmt emulation or remote builder
 ```
 
-### Building T2 MacBook Pro ISO on x86_64 Linux
-
-For MacBook Pro with T2 chip (2018-2020 Intel models):
-
-```bash
-# Build T2-specific ISO (only available on x86_64 Linux)
-nix build .#packages.x86_64-linux.iso-t2
-
-# ISO will be in: result/iso/nixos-minimal-x86_64-t2-custom.iso
-```
-
-**T2 ISO Details:**
-- Extends [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) with custom editor configurations
-- Includes Apple T2 hardware support (WiFi, audio, keyboard, TouchBar)
-- Requires firmware extraction from macOS (use `get-apple-firmware` script in ISO)
-- See [T2 Linux Wiki](https://wiki.t2linux.org/) for detailed hardware setup
-
 ### Building on macOS (M4 MacBook, etc.)
 
 **NixOS ISOs cannot be built natively on macOS.** Use one of these alternatives:
@@ -112,21 +94,13 @@ Builds are automatically triggered on:
 
 ### Build Strategy
 
-**Dual Job Approach for Optimal Performance:**
-
-**Job 1: Standard ISOs (build-standard)**
+**Parallel Build Approach:**
 - x86_64 and aarch64 build in **parallel** for speed
 - Use pre-built kernels from cache
 - **QEMU emulation** enables aarch64 builds on x86_64 runners
-- Fast builds: 2-5 minutes each
+- Fast builds: 2-5 minutes for x86_64, 20-45 minutes for aarch64
 
-**Job 2: T2 ISO (build-t2)**
-- Builds separately with dedicated runner resources
-- T2 requires custom kernel compilation (~90 minutes)
-- Uses `GC_DONT_GC=1` to prevent garbage collection during long build
-- Maximizes build space before kernel compilation
-
-**Common Infrastructure:**
+**Infrastructure:**
 - **Nix caching** via GitHub Actions reduces build times
 - **Validation tests** ensure ISO integrity before upload
 - **Artifacts** available for all builds (90-day retention)
@@ -135,7 +109,6 @@ Builds are automatically triggered on:
 **Build Times:**
 - x86_64 builds: ~2-5 minutes (native, pre-built kernel)
 - aarch64 builds: ~20-45 minutes (QEMU emulation overhead)
-- x86_64-t2 builds: ~90 minutes (custom kernel compilation with T2 patches)
 
 ### Accessing Build Artifacts
 
@@ -321,13 +294,12 @@ qemu-system-aarch64 \
 custom-minimal-cd/
 ├── .github/
 │   └── workflows/
-│       └── build-iso.yml           # GitHub Actions workflow (dual job strategy)
+│       └── build-iso.yml           # GitHub Actions workflow
 ├── editors/
 │   ├── helix.nix                  # Helix editor configuration
 │   └── neovim.nix                 # Neovim editor configuration
 ├── flake-parts/
-│   ├── iso.nix                    # Standard ISO configuration module
-│   └── t2-iso.nix                 # T2 ISO module (extends t2linux/nixos-t2-iso)
+│   └── iso.nix                    # ISO configuration module
 ├── flake.nix                      # Main flake entry point (uses flake-parts)
 ├── flake.lock                     # Flake dependencies lock file
 ├── configuration.nix              # System configuration
@@ -372,8 +344,7 @@ custom-minimal-cd/
 
 - **x86_64 ISO**: `nixos-minimal-x86_64-custom.iso`
 - **aarch64 ISO**: `nixos-minimal-aarch64-custom.iso`
-- **T2 MacBook Pro ISO**: `nixos-minimal-x86_64-t2-custom.iso`
-- **Size**: ~500-800 MB (varies by architecture and T2 modules)
+- **Size**: ~500-800 MB (varies by architecture)
 
 ### CI/CD Pipeline
 
@@ -430,21 +401,6 @@ custom-minimal-cd/
 
 **Solution**: Ensure you're logged into GitHub and have access to the repository.
 
-### T2 MacBook Pro Specific Issues
-
-The T2 ISO extends [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) which provides comprehensive T2 hardware support.
-
-**Common Issues:**
-- WiFi/Bluetooth requires firmware extraction from macOS (use included `get-apple-firmware` script)
-- Secure Boot must be disabled in macOS Recovery
-- USB keyboard may be needed during initial setup if internal keyboard doesn't work
-
-**Resources:**
-- [T2 Linux Wiki](https://wiki.t2linux.org/) - Comprehensive T2 troubleshooting
-- [T2 Linux Installation Guide](https://wiki.t2linux.org/guides/installation/)
-- [T2 Linux WiFi Guide](https://wiki.t2linux.org/guides/wifi/)
-- [T2 Linux Audio Guide](https://wiki.t2linux.org/guides/audio/)
-
 ## Contributing
 
 1. Fork the repository
@@ -464,5 +420,3 @@ This project is provided as-is for educational and personal use.
 - [NixOS ISO Image](https://nixos.wiki/wiki/Creating_a_NixOS_live_CD)
 - [Helix Editor](https://helix-editor.com/)
 - [Neovim](https://neovim.io/)
-- [t2linux/nixos-t2-iso](https://github.com/t2linux/nixos-t2-iso) - Official T2 MacBook Pro NixOS installer
-- [T2 Linux Wiki](https://wiki.t2linux.org/) - Comprehensive guide for running Linux on T2 Macs
