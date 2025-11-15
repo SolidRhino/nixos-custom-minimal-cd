@@ -1,40 +1,56 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 
 {
-  # Install Helix editor with LSP tooling
-  environment.systemPackages = with pkgs; [
-    helix
-    nil           # Nix LSP server
-    nixpkgs-fmt   # Nix formatter
-  ];
+  # Helix configuration
+  environment.etc."helix/config.toml".text = ''
+    theme = "catppuccin_mocha"
 
-  # Configure Helix language server for Nix
+    [editor]
+    line-number = "relative"
+    mouse = true
+    cursorline = true
+    auto-save = false
+    completion-trigger-len = 2
+    bufferline = "multiple"
+    color-modes = true
+
+    [editor.statusline]
+    left = ["mode", "spinner", "file-name", "file-modification-indicator"]
+    right = ["diagnostics", "selections", "position", "file-encoding"]
+
+    [editor.cursor-shape]
+    insert = "bar"
+    normal = "block"
+    select = "underline"
+
+    [editor.file-picker]
+    hidden = false
+
+    [editor.lsp]
+    display-messages = true
+    display-inlay-hints = true
+
+    [editor.indent-guides]
+    render = true
+    character = "│"
+  '';
+
+  # Helix languages configuration
   environment.etc."helix/languages.toml".text = ''
     [[language]]
     name = "nix"
     language-servers = ["nil"]
-    formatter = { command = "nixpkgs-fmt" }
     auto-format = true
+    formatter = { command = "nixpkgs-fmt" }
 
     [language-server.nil]
     command = "nil"
   '';
 
-  # Default Helix configuration (extensible)
-  # To customize, you can add configurations here or override via environment variables
-  #
-  # Example for future theme/plugin additions:
-  # environment.etc."helix/config.toml".text = ''
-  #   theme = "onedark"
-  #
-  #   [editor]
-  #   line-number = "relative"
-  #   mouse = true
-  # '';
-  #
-  # Themes can be added by:
-  # 1. Adding theme files to environment.etc."helix/themes/"
-  # 2. Or using helix runtime directory configuration
-  #
-  # See: https://docs.helix-editor.com/configuration.html
+  # Include nil LSP and formatter
+  environment.systemPackages = with pkgs; [
+    helix
+    nil
+    nixpkgs-fmt
+  ];
 }
