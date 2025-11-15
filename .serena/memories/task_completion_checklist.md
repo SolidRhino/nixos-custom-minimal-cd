@@ -47,7 +47,7 @@ Since this is a Darwin (macOS) system, ISO builds must be done via GitHub Action
 
 - [ ] **Monitor Build**: Check GitHub Actions for build status
   - Go to repository Actions tab
-  - Verify all three builds succeed (x86_64-generic, aarch64-generic, x86_64-t2)
+  - Verify both builds succeed (x86_64, aarch64)
   - Check build logs for errors or warnings
 
 - [ ] **Validate ISOs**: Download and test built ISOs
@@ -102,7 +102,7 @@ Before creating a tagged release:
 - [ ] All features tested and working
 - [ ] README.md is up to date
 - [ ] CLAUDE.md reflects current architecture
-- [ ] All three ISOs build successfully (x86_64, aarch64, T2)
+- [ ] Both ISOs build successfully (x86_64, aarch64)
 - [ ] ISOs boot and function correctly
 - [ ] Commit history is clean and meaningful
 - [ ] Version tag follows semantic versioning (vX.Y.Z)

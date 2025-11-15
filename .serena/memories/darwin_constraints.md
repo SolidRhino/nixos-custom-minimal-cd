@@ -35,7 +35,7 @@ Current system: **Darwin** (macOS, including M4 MacBooks)
 
 1. **Make changes** to configuration files locally on macOS
 2. **Commit and push** to GitHub repository
-3. **GitHub Actions** automatically builds all three ISOs (x86_64, aarch64, x86_64-t2)
+3. **GitHub Actions** automatically builds both ISOs (x86_64, aarch64)
 4. **Download ISOs** from GitHub Actions artifacts or releases
 5. **Test ISOs** in a VM (UTM recommended for M4 Macs)
 
@@ -110,6 +110,6 @@ pbpaste > file        # Paste clipboard to file
 
 When working on this project from Darwin:
 1. **Edit locally**, commit, push to GitHub
-2. **Let GitHub Actions build** ISOs for all three targets (x86_64-generic, aarch64-generic, x86_64-t2)
+2. **Let GitHub Actions build** ISOs for both targets (x86_64, aarch64)
 3. **Download and test** built ISOs in VM or hardware
 4. **Never attempt** `nix build .#iso` locally (will fail)

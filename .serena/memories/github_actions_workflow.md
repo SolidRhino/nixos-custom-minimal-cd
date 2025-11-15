@@ -8,31 +8,13 @@
 - Manual workflow_dispatch
 - Paths-ignore: **.md, docs/**, .serena/memories/**
 
-**Build Strategy - Dual Jobs:**
+**Build Strategy - Parallel Matrix:**
 
-### Job 1: build-standard (x86_64, aarch64)
-- Matrix builds in parallel (fast, 2-5 minutes)
-- Use pre-built kernels from cache
+- Matrix builds x86_64 and aarch64 in parallel
+- x86_64: Fast builds (2-5 minutes) using pre-built kernels
+- aarch64: Medium builds (20-45 minutes) with QEMU emulation
 - No space cleanup needed
-- QEMU for aarch64 emulation on x86_64 runners
-
-### Job 2: build-t2 (separate job)
-- Dedicated runner for T2 kernel compilation
-- **GC_DONT_GC=1**: Prevents garbage collection during 90+ minute kernel build
-- Maximize build space before compilation
-- Uses --accept-flake-config flag
-- Cleanup result after upload
-- No QEMU (T2 is x86_64 only)
-
-**T2 Disk Space Protection (Dual Strategy):**
-1. **Separate Job**: T2 gets dedicated runner (~14GB space, no competition)
-2. **GC Protection**: GC_DONT_GC=1 prevents deletion of intermediate build artifacts
-
-**Rationale:**
-- T2 builds custom patched kernel (massive, 90+ minutes)
-- Standard builds use pre-built kernels (fast, 2-5 minutes)
-- Previous parallel matrix exhausted disk space during T2 kernel compilation
-- Matches proven t2linux/nixos-t2-iso build strategy
+- Uses Nix binary cache for efficiency
 
 ## Build Space Optimization
 
@@ -81,7 +63,7 @@ git tag v1.0.0
 git push origin v1.0.0
 
 # GitHub Actions will:
-1. Build both architectures
+1. Build x86_64 and aarch64 architectures
 2. Create GitHub Release
 3. Upload ISOs as release assets
 ```

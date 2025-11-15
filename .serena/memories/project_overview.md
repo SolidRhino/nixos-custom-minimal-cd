@@ -4,7 +4,7 @@
 Custom minimal NixOS installation ISO with enhanced tooling for quick installations, repairs, and multi-machine deployments.
 
 ## Key Features
-- **Multi-Architecture Support**: x86_64-linux, aarch64-linux (ARM64), and x86_64-t2 (MacBook Pro with T2 chip)
+- **Multi-Architecture Support**: x86_64-linux and aarch64-linux (ARM64)
 - **Pre-configured Editors**: Helix and Neovim with nixvim (LSP, Treesitter, syntax highlighting)
 - **Development Tools**: Git, Nix LSP (nil), auto-formatting
 - **SSH Access**: Enabled with password authentication (root password: `installer`)
@@ -14,7 +14,7 @@ Custom minimal NixOS installation ISO with enhanced tooling for quick installati
 
 ## Output
 - ISO images suitable for USB boot or VM usage
-- Filenames: `nixos-minimal-{x86_64|aarch64}-custom.iso` and `nixos-minimal-x86_64-t2-custom.iso`
+- Filenames: `nixos-minimal-x86_64-custom.iso` and `nixos-minimal-aarch64-custom.iso`
 - Size: ~500-800 MB per architecture
 
 ## Use Cases

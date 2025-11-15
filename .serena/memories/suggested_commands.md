@@ -75,9 +75,8 @@ nix flake check  # may not work on Darwin for ISO builds
 1. Go to Actions tab in GitHub repository
 2. Click on successful workflow run
 3. Download artifacts (ISO files)
-   - `nixos-minimal-x86_64-custom.iso` (standard x86_64)
+   - `nixos-minimal-x86_64-custom.iso` (Intel/AMD 64-bit)
    - `nixos-minimal-aarch64-custom.iso` (ARM64)
-   - `nixos-minimal-x86_64-t2-custom.iso` (T2 MacBook Pro)
 
 ### Test with VM (macOS)
 
@@ -91,7 +90,6 @@ nix flake check  # may not work on Darwin for ISO builds
 
 # Using QEMU (if installed)
 qemu-system-x86_64 -m 2G -cdrom nixos-minimal-x86_64-custom.iso -boot d
-qemu-system-x86_64 -m 2G -cdrom nixos-minimal-x86_64-t2-custom.iso -boot d  # T2 ISO
 qemu-system-aarch64 -M virt -cpu cortex-a72 -m 2G -cdrom nixos-minimal-aarch64-custom.iso -boot d
 ```
 
