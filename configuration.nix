@@ -4,6 +4,9 @@
   imports = [
     ./editors/helix.nix
     ./editors/neovim.nix
+    ./motd.nix
+    ./shell-config.nix
+    ./scripts/quick-install.nix
   ];
 
   # Enable flakes and nix-command experimental features system-wide
@@ -30,6 +33,19 @@
   # Install essential tools
   environment.systemPackages = with pkgs; [
     git
+
+    # Modern CLI tools for enhanced developer experience
+    ripgrep  # Fast grep replacement
+    fd       # Fast find replacement
+    bat      # Cat with syntax highlighting
+    eza      # Modern ls replacement
+    jq       # JSON processor
+    yq-go    # YAML processor
+    nmap     # Network exploration
+    tmux     # Terminal multiplexer
+    ncdu     # Disk usage analyzer
+    btop     # Modern system monitor
+
     # All standard minimal ISO tools are included via the base module
   ];
 
