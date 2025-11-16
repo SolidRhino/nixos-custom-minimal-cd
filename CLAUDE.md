@@ -16,6 +16,9 @@ This project uses [flake-parts](https://flake.parts/) to eliminate duplication a
 - **flake-parts/iso.nix**: Contains the `perSystem` configuration and ISO builder logic
 - **configuration.nix**: System configuration imported by ISO modules
 - **editors/**: Modular editor configurations (helix.nix, neovim.nix)
+- **motd.nix**: Message of the day showing available features
+- **shell-config.nix**: Bash configuration with modern aliases
+- **scripts/quick-install.nix**: Installation helper scripts
 
 **Key Pattern**: The `mkIso` helper function in `flake-parts/iso.nix` creates ISO images for each system by combining:
 1. Base minimal installation ISO module from nixpkgs
@@ -64,6 +67,18 @@ nix eval .#nixosConfigurations.x86_64-linux.config.system.name
 nix fmt
 ```
 
+### Testing ISO Features
+
+```bash
+# After building/downloading ISO, boot in VM and verify:
+- MOTD displays on login
+- Run: nixos-quick-start
+- Run: show-disk-layout
+- Run: show-network-info
+- Test aliases: ll, gs, myip
+- Test modern tools: rg, fd, bat, eza
+```
+
 ### CI/CD Testing
 
 The GitHub Actions workflow (`.github/workflows/build-iso.yml`) builds x86_64 and aarch64 ISOs in parallel (2-5 minutes for x86_64, 20-45 minutes for aarch64 with QEMU emulation).
@@ -102,6 +117,19 @@ environment.systemPackages = with pkgs; [
 - Uses nixvim for declarative configuration
 - LSP, Treesitter, and plugins configured via nixvim options
 - Space key is configured as leader
+
+### Installation Helpers
+
+Helper scripts are defined in `scripts/quick-install.nix` using `pkgs.writeShellScriptBin`:
+
+```nix
+(pkgs.writeShellScriptBin "script-name" ''
+  #!/usr/bin/env bash
+  # Script content here
+'')
+```
+
+These scripts become available system-wide after ISO boots.
 
 ### Modifying ISO Output
 
