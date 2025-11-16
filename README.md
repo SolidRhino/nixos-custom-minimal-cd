@@ -14,6 +14,53 @@ A flake-based minimal NixOS installation ISO with enhanced tooling for quick ins
 - **Multi-Architecture**: Supports x86_64 and aarch64 (ARM64)
 - **Automated Builds**: GitHub Actions CI/CD pipeline
 
+## What's Included
+
+### Base NixOS Minimal Installation ISO
+
+This ISO inherits **all standard tools** from the NixOS minimal installation CD, including:
+
+- **Disk Utilities**: fdisk, parted, gdisk, gptfdisk, cfdisk
+- **Filesystems**: Support for ext4, btrfs, xfs, NTFS, FAT32, and more
+- **Network**: NetworkManager with WiFi support (`nmtui` command for easy WiFi setup)
+- **Hardware Tools**: lshw, pciutils, usbutils, dmidecode
+- **Recovery Tools**: testdisk, ddrescue
+- **Standard Editors**: nano, vim
+- **Terminal**: screen (terminal multiplexer)
+- **Compression**: gzip, bzip2, xz, and more
+- **Network Tools**: curl, wget, rsync, inetutils
+- **And much more**: All standard Linux utilities and NixOS installation tools
+
+### Custom Enhancements
+
+On top of the base ISO, this custom version adds:
+
+#### 🎨 Modern Editors
+- **Helix** (`hx`) - Modern modal editor with built-in LSP support and Catppuccin Mocha theme
+- **Neovim** (`nvim`) - Configured via nixvim with Nix LSP, Treesitter, Gruvbox theme
+
+#### 💻 Developer-Optimized CLI Tools
+- **ripgrep** (`rg`) - Fast recursive search tool
+- **fd** - Fast and user-friendly alternative to find
+- **bat** - Cat clone with syntax highlighting
+- **eza** - Modern ls replacement with colors and git integration
+- **jq** / **yq** - JSON and YAML processors
+- **tmux** - Terminal multiplexer for session management
+- **ncdu** - Interactive disk usage analyzer
+- **btop** - Modern resource monitor
+
+#### 🚀 Installation Helpers
+- **nixos-quick-start** - Interactive installation guide
+- **show-disk-layout** - Quick disk and partition overview
+- **show-network-info** - Network configuration details
+- Shell aliases for common tasks (ll, gs, myip, etc.)
+
+#### ⚙️ Quality of Life
+- **Flakes Enabled** - Use nix build/develop/run immediately
+- **SSH Ready** - Password authentication enabled (root/installer)
+- **Enhanced Shell** - Bash with completion and helpful aliases
+- **MOTD** - Welcome message showing available tools and quick start guide
+
 ## Quick Start
 
 ### Download Pre-Built ISOs
@@ -31,8 +78,10 @@ ISO filenames:
 1. Write the ISO to a USB drive or boot in a VM
 2. Boot from the ISO
 3. Log in as `root` with password `installer`
-4. Network should auto-configure via DHCP
-5. SSH is available for remote access
+4. You'll see a welcome message (MOTD) showing available tools
+5. Run `nixos-quick-start` for an interactive installation guide
+6. Network should auto-configure via DHCP (or run `nmtui` for WiFi)
+7. SSH is available for remote access
 
 ## Local Building
 
@@ -120,6 +169,68 @@ Builds are automatically triggered on:
 #### From Releases
 1. Go to [Releases](../../releases)
 2. Download ISOs from release assets
+
+## Using Modern CLI Tools
+
+The ISO includes modern alternatives to standard Unix tools:
+
+### Search and Navigation
+```bash
+# Fast file search (better than find)
+fd config.nix
+fd "\.nix$" /etc
+
+# Fast text search (better than grep)
+rg "imports" --type nix
+rg -i "nixos" configuration.nix
+
+# Better file listing
+ll              # Alias for: eza -alh --group-directories-first
+eza --tree      # Tree view
+eza --git       # Show git status
+```
+
+### File Viewing
+```bash
+# Syntax-highlighted file viewing
+bat configuration.nix
+bat --style=plain file.txt  # No line numbers
+
+# Interactive disk usage
+ncdu /
+```
+
+### Data Processing
+```bash
+# JSON processing
+nix flake metadata --json | jq '.locks.nodes'
+
+# YAML processing
+yq eval '.services' config.yaml
+```
+
+### System Monitoring
+```bash
+# Modern system monitor
+btop
+
+# Network information helpers
+myip        # Show IP addresses
+netinfo     # Full network configuration
+ports       # Show listening ports
+```
+
+### Installation Helpers
+```bash
+# Interactive installation guide
+nixos-quick-start
+
+# Quick disk overview
+show-disk-layout
+
+# Network status
+show-network-info
+```
 
 ## Customization
 
