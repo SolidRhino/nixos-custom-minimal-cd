@@ -11,6 +11,10 @@ Custom minimal NixOS installation ISO with enhanced tooling for quick installati
 - **Networking**: DHCP auto-configuration
 - **Flakes**: Experimental features permanently enabled system-wide
 - **Automated CI/CD**: GitHub Actions builds both architectures in parallel
+- **Modern CLI Tools**: ripgrep, fd, bat, eza, jq, yq, tmux, ncdu, btop
+- **Installation Helpers**: Quick-start guide, disk/network info scripts
+- **Enhanced Shell**: Bash with completion and helpful aliases
+- **MOTD**: Welcome message showing available tools
 
 ## Output
 - ISO images suitable for USB boot or VM usage

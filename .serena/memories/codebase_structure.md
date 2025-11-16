@@ -11,6 +11,10 @@ custom-minimal-cd/
 ├── flake.nix                    # Main flake entry point (uses flake-parts)
 ├── flake.lock                   # Dependency lock file (auto-generated)
 ├── configuration.nix            # Main system configuration
+├── motd.nix                     # Message of the day configuration
+├── shell-config.nix             # Bash configuration with aliases
+├── scripts/                     # Helper scripts
+│   └── quick-install.nix       # Installation helper scripts
 ├── flake-parts/                 # Modular flake components
 │   └── iso.nix                 # ISO builder logic with perSystem
 ├── editors/                     # Editor-specific configurations
@@ -45,12 +49,31 @@ custom-minimal-cd/
 - Main system configuration imported by ISO modules
 - Contains:
   - Editor imports (helix.nix, neovim.nix)
+  - Module imports (motd.nix, shell-config.nix, scripts/quick-install.nix)
   - Experimental features (flakes, nix-command)
   - Root user password configuration
   - SSH settings
   - Networking (DHCP)
-  - System packages
+  - System packages (including modern CLI tools)
   - ISO-specific settings (filename, bootability)
+
+**motd.nix**
+- Message of the day (MOTD) configuration
+- Shows available editors, tools, and quick start guide
+- Displayed on login to root account
+
+**shell-config.nix**
+- Bash shell configuration
+- Modern CLI tool aliases (ll, cat -> bat, etc.)
+- Git shortcuts (gs, gd, gl)
+- Network helpers (myip, netinfo)
+- Nix shortcuts (nxs, nxb, nxd)
+
+**scripts/quick-install.nix**
+- Installation helper scripts using writeShellScriptBin
+- nixos-quick-start: Interactive installation guide
+- show-disk-layout: Disk and partition overview
+- show-network-info: Network configuration details
 
 ### Flake-Parts Modules
 
