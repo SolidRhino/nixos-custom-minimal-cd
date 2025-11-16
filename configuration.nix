@@ -30,21 +30,32 @@
   # Enable DHCP networking
   networking.useDHCP = lib.mkDefault true;
 
-  # Install essential tools
+  # Install modern CLI tools (Developer Optimized)
   environment.systemPackages = with pkgs; [
+    # Version control
     git
 
-    # Modern CLI tools for enhanced developer experience
-    ripgrep  # Fast grep replacement
-    fd       # Fast find replacement
-    bat      # Cat with syntax highlighting
-    eza      # Modern ls replacement
-    jq       # JSON processor
-    yq-go    # YAML processor
-    nmap     # Network exploration
-    tmux     # Terminal multiplexer
-    ncdu     # Disk usage analyzer
-    btop     # Modern system monitor
+    # Modern CLI replacements
+    ripgrep    # Better grep (rg)
+    fd         # Better find
+    bat        # Better cat with syntax highlighting
+    eza        # Better ls with colors and git integration
+
+    # Data processing
+    jq         # JSON processor
+    yq-go      # YAML processor
+
+    # Network tools (beyond base ISO)
+    nmap       # Network scanning
+
+    # Terminal multiplexer
+    tmux       # Session management
+
+    # Disk usage
+    ncdu       # Interactive disk usage analyzer
+
+    # Performance monitoring (beyond base htop)
+    btop       # Modern system monitor
 
     # All standard minimal ISO tools are included via the base module
   ];
