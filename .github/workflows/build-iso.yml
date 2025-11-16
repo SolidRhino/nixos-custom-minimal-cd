@@ -13,6 +13,13 @@ on:
       - 'docs/**'
       - '.serena/memories/**'
 
+  # Trigger on pull requests
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.serena/memories/**'
+
   # Manual workflow dispatch
   workflow_dispatch:
 
